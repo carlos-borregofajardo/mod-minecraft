@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "s s",
+    "   ",
+    "   "
+  ],
+  "key": {
+    "s": "minecraft:cobblestone"
+  },
+  "result": {
+    "id": "teleport_portals:blue_base",
+    "count": 10
+  }
+}

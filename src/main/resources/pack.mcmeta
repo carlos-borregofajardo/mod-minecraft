@@ -1,0 +1,10 @@
+{
+  "pack": {
+    "description": "teleport_portals resources",
+    "max_format": 107,
+    "min_format": [
+      107,
+      1
+    ]
+  }
+}

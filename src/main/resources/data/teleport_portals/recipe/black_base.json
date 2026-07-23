@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "s s",
+    "   ",
+    "   "
+  ],
+  "key": {
+    "s": "minecraft:gravel"
+  },
+  "result": {
+    "id": "teleport_portals:black_base",
+    "count": 10
+  }
+}

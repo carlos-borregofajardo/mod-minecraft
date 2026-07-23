@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "teleport_portals:item/yellow_base"
+  }
+}

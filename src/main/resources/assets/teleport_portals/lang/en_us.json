@@ -1,0 +1,21 @@
+{
+  "block.teleport_portals.green_portal": "Green Portal",
+  "block.teleport_portals.green_base": "Green Teleport Base",
+  "block.teleport_portals.blue_portal": "Blue Portal",
+  "block.teleport_portals.blue_base": "Blue Teleport Base",
+  "block.teleport_portals.yellow_portal": "Yellow Portal",
+  "block.teleport_portals.yellow_base": "Yellow Teleport Base",
+  "block.teleport_portals.red_portal": "Red Portal",
+  "block.teleport_portals.red_base": "Red Teleport Base",
+  "block.teleport_portals.light_gray_portal": "Light Gray Portal",
+  "block.teleport_portals.light_gray_base": "Light Gray Teleport Base",
+  "block.teleport_portals.black_portal": "Black Portal",
+  "block.teleport_portals.black_base": "Black Teleport Base",
+
+  "item.teleport_portals.portals_tab": "Teleport Portals",
+
+  "message.teleport_portals.portal_destroyed": "The return portal was destroyed; cannot teleport to base.",
+  "message.teleport_portals.no_base_block": "No base block placed; cannot teleport after death.",
+  "message.teleport_portals.no_safe_portal_spot": "Could not create a safe portal near the death point.",
+  "message.teleport_portals.return_portal_gone": "The return portal no longer exists; cannot return to the death point."
+}
