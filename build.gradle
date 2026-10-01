@@ -43,6 +43,19 @@ minecraft {
     }
 }
 
+// The GLFW that ships with LWJGL 3.4 has both a Wayland and an X11 backend and picks Wayland on
+// Wayland sessions, but Minecraft's GLFW init is not Wayland-compatible yet: Forge's early window
+// calls glfwGetWindowPos, which Wayland reports as GLFW_FEATURE_UNAVAILABLE (0x1000C), and that
+// error is still pending when the real window is created, so startup dies with
+// "GLFW error before init: Wayland: The platform does not provide the window position".
+// GLFW selects the X11 backend (XWayland) when XDG_SESSION_TYPE is not "wayland".
+// Note: this has to be set on the run task, not in the runs{} block, which only adds variables.
+if (System.getenv('DISPLAY') != null) {
+    tasks.withType(JavaExec).configureEach {
+        environment 'XDG_SESSION_TYPE', 'x11'
+    }
+}
+
 repositories {
     minecraft.mavenizer(it) // In Kotlin, it = this
     maven fg.forgeMaven
