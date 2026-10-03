@@ -31,3 +31,7 @@ forge*changelog.txt
 # python (scripts de tools/)
 __pycache__/
 *.pyc
+
+# Documentacion local, intentionally not committed
+AGENTS.md
+DISENO_TECNICO.md
