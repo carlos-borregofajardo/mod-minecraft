@@ -1,9 +1,11 @@
 package com.example.snifferblooms;
 
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
@@ -27,5 +29,12 @@ public final class SnifferBloomsMod {
 
     public SnifferBloomsMod(FMLJavaModLoadingContext context) {
         ITEMS.register(context.getModBusGroup());
+        BuildCreativeModeTabContentsEvent.BUS.addListener(this::addCreativeTabItems);
+    }
+
+    private void addCreativeTabItems(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
+            event.accept(SOFT_TERRACOTTA_DYE);
+        }
     }
 }
