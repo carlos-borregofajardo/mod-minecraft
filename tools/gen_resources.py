@@ -1,14 +1,19 @@
 """
-Genera los recursos JSON de Sniffer Blooms a partir de la tabla de FossilColor.
+JSON resource generator for Sniffer Blooms.
+
+Writes every data file the game needs to display and use the 16 dyes:
+item definitions, item models, translations, and the two vanilla recipe overrides.
 
     python tools/gen_resources.py
 
-Genera:
-  assets/sniffer_blooms/items/<id>_dye.json      definicion de item
-  assets/sniffer_blooms/models/item/<id>_dye.json modelo
-  assets/sniffer_blooms/lang/es_es.json          traduccion
-  assets/sniffer_blooms/lang/en_us.json          traduccion
-  data/minecraft/recipe/*_from_*.json            recetas vanilla sobrescritas
+Output:
+  assets/sniffer_blooms/items/<id>_dye.json       item definition
+  assets/sniffer_blooms/models/item/<id>_dye.json item model
+  assets/sniffer_blooms/lang/es_es.json           Spanish names
+  assets/sniffer_blooms/lang/en_us.json           English names
+  data/minecraft/recipe/*_from_*.json             overridden vanilla recipes
+
+Do not edit the generated files by hand, they get overwritten on every run.
 """
 
 import json
@@ -19,7 +24,8 @@ ASSETS = os.path.join(ROOT, "src", "main", "resources", "assets", "sniffer_bloom
 DATA = os.path.join(ROOT, "src", "main", "resources", "data")
 NS = "sniffer_blooms"
 
-# (id, nombre_es, nombre_en, hex, vanilla_dye, bioma)
+# Fields: (id, name_es, name_en, hex, closest vanilla dye color)
+# Mirrors COLORS in gen_textures.py. Kept in sync by hand, so change both together.
 COLORS = [
     ("soft_terracotta", "Tinte Terracota Suave", "Soft Terracotta Dye", 0xD98A62, "orange"),
     ("fossil_turquoise", "Tinte Turquesa Fosil", "Fossil Turquoise Dye", 0x62B7AE, "cyan"),
@@ -41,6 +47,11 @@ COLORS = [
 
 
 def write(path, data):
+    """Save a Python object as a pretty-printed JSON file.
+
+    ensure_ascii=False keeps the accented Spanish names readable instead of
+    turning them into \\uXXXX escapes.
+    """
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -49,16 +60,27 @@ def write(path, data):
 
 
 def gen_item_defs():
+    """Write one item definition per dye.
+
+    This is the file that tells the game "an item called sniffer_blooms:soft_terracotta_dye
+    exists, and it is drawn with this model". Without it, registering the item in Java
+    makes it exist in code but invisible in the game.
+    """
     print("[items]")
-    for cid, _es, _en, _rgb, _vd in COLORS:
+    for cid, _name_es, _name_en, _rgb, _vanilla in COLORS:
         write(os.path.join(ASSETS, "items", f"{cid}_dye.json"), {
             "model": {"type": "minecraft:model", "model": f"{NS}:item/{cid}_dye"}
         })
 
 
 def gen_models():
+    """Write the item model per dye, which points at the PNG texture.
+
+    The parent "item/generated" is the vanilla template for flat 2D sprites, the
+    same one every vanilla dye uses.
+    """
     print("[models]")
-    for cid, _es, _en, _rgb, _vd in COLORS:
+    for cid, _name_es, _name_en, _rgb, _vanilla in COLORS:
         write(os.path.join(ASSETS, "models", "item", f"{cid}_dye.json"), {
             "parent": "minecraft:item/generated",
             "textures": {"layer0": f"{NS}:item/{cid}_dye"}
@@ -66,15 +88,22 @@ def gen_models():
 
 
 def gen_lang():
+    """Write the translation files for Spanish and English.
+
+    The key is derived from the item id, so item.sniffer_blooms.soft_terracotta_dye
+    is what makes "Tinte Terracota Suave" appear under the icon.
+    """
     print("[lang]")
     for lang, idx in (("es_es", 1), ("en_us", 2)):
         data = {f"item.{NS}.{cid}_dye": row[idx] for row in COLORS for cid in [row[0]]}
         write(os.path.join(ASSETS, "lang", f"{lang}.json"), data)
 
 
-# Las dos plantas vanilla: Torchflower -> Terracota suave, Pitcher Plant -> Turquesa fosil
-# Se sobrescriben las recetas vanilla, conservando el grupo para que sigan apareciendo
-# en el libro de recetas junto a las demas recetas de tinte.
+# The two vanilla plants are repurposed so their recipes yield our first two dyes.
+# Fields: (recipe file name, vanilla ingredient, our color id, amount, recipe group)
+# The recipe path is written under data/minecraft/, which replaces the vanilla recipe
+# of the same name. The original group is kept so they still show up together in the
+# recipe book, and the original yield amount is preserved.
 VANILLA_RECIPE_OVERRIDES = [
     ("orange_dye_from_torchflower", "torchflower", "soft_terracotta", 1, "orange_dye"),
     ("cyan_dye_from_pitcher_plant", "pitcher_plant", "fossil_turquoise", 2, "cyan_dye"),
@@ -82,6 +111,12 @@ VANILLA_RECIPE_OVERRIDES = [
 
 
 def gen_recipe_overrides():
+    """Write the two recipes that replace the vanilla torchflower and pitcher ones.
+
+    Torchflower now gives the terracotta dye, pitcher plant the turquoise one. This is
+    the only change the mod makes to vanilla behavior so far, and the 16 vanilla dyes
+    themselves are left untouched.
+    """
     print("[recipes vanilla sobrescritas]")
     for name, ingredient, target, count, group in VANILLA_RECIPE_OVERRIDES:
         write(os.path.join(DATA, "minecraft", "recipe", f"{name}.json"), {
