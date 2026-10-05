@@ -1,0 +1,18 @@
+{
+  "model": {
+    "type": "minecraft:composite",
+    "models": [
+      {
+        "type": "minecraft:model",
+        "model": "sniffer_blooms:block/soft_terracotta_bed_head"
+      },
+      {
+        "type": "minecraft:model",
+        "model": "sniffer_blooms:block/soft_terracotta_bed_foot",
+        "transformation": {
+          "translation": [0.0, 0.0, 1.0]
+        }
+      }
+    ]
+  }
+}

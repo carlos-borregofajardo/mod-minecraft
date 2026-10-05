@@ -20,10 +20,11 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.block.WoolCarpetBlock;
 import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.ConcretePowderBlock;
 import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.CandleCakeBlock;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
@@ -155,6 +156,18 @@ public final class SnifferBloomsMod {
                 .pushReaction(PushReaction.DESTROY)
     ));
 
+    public static final RegistryObject<Block> SOFT_TERRACOTTA_BED =
+        BLOCKS.register("soft_terracotta_bed", () -> new BedBlock(
+            DyeColor.ORANGE,
+            BlockBehaviour.Properties.of()
+                .setId(BLOCKS.key("soft_terracotta_bed"))
+                .mapColor(MapColor.TERRACOTTA_ORANGE)
+                .strength(0.2F)
+                .sound(SoundType.WOOD)
+                .ignitedByLava()
+                .noOcclusion()
+    ));
+
     //items
     public static final RegistryObject<Item> SOFT_TERRACOTTA_DYE =
         ITEMS.register("soft_terracotta_dye", () -> new DyeItem(
@@ -235,6 +248,14 @@ public final class SnifferBloomsMod {
                 .useBlockDescriptionPrefix()
     ));
 
+    public static final RegistryObject<Item> SOFT_TERRACOTTA_BED_ITEM =
+        ITEMS.register("soft_terracotta_bed", () -> new BlockItem(
+            SOFT_TERRACOTTA_BED.get(),
+            new Item.Properties()
+                .setId(ITEMS.key("soft_terracotta_bed"))
+                .useBlockDescriptionPrefix()
+    ));
+
     public SnifferBloomsMod(FMLJavaModLoadingContext context) {
         BLOCKS.register(context.getModBusGroup());
         ITEMS.register(context.getModBusGroup());
@@ -255,6 +276,7 @@ public final class SnifferBloomsMod {
             event.accept(SOFT_TERRACOTTA_CONCRETE_POWDER_ITEM);
             event.accept(SOFT_TERRACOTTA_CANDLE_ITEM);
             event.accept(SOFT_TERRACOTTA_SHULKER_BOX_ITEM);
+            event.accept(SOFT_TERRACOTTA_BED_ITEM);
         }
     }
 }

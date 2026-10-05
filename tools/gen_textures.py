@@ -77,6 +77,13 @@ SOURCE_CANDLE = "assets/minecraft/textures/block/orange_candle.png"
 SOURCE_CANDLE_LIT = "assets/minecraft/textures/block/orange_candle_lit.png"
 SOURCE_CANDLE_ITEM = "assets/minecraft/textures/item/orange_candle.png"
 SOURCE_SHULKER = "assets/minecraft/textures/entity/shulker/shulker_white.png"
+SOURCE_BED_FOOT_EAST = "assets/minecraft/textures/block/orange_bed_foot_east.png"
+SOURCE_BED_FOOT_SOUTH = "assets/minecraft/textures/block/orange_bed_foot_south.png"
+SOURCE_BED_FOOT_UP = "assets/minecraft/textures/block/orange_bed_foot_up.png"
+SOURCE_BED_FOOT_WEST = "assets/minecraft/textures/block/orange_bed_foot_west.png"
+SOURCE_BED_HEAD_EAST = "assets/minecraft/textures/block/orange_bed_head_east.png"
+SOURCE_BED_HEAD_UP = "assets/minecraft/textures/block/orange_bed_head_up.png"
+SOURCE_BED_HEAD_WEST = "assets/minecraft/textures/block/orange_bed_head_west.png"
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -204,3 +211,26 @@ if __name__ == "__main__":
     if what in ("all", "shulker"):
         os.makedirs(os.path.join(RES, "entity", "shulker"), exist_ok=True)
         generate("shulker", SOURCE_SHULKER, "entity/shulker", "shulker_", "", color)
+    if what in ("all", "bed"):
+        bed_dir = os.path.join(RES, "block")
+        os.makedirs(bed_dir, exist_ok=True)
+        for name, src in [
+            ("bed_foot_east", SOURCE_BED_FOOT_EAST),
+            ("bed_foot_south", SOURCE_BED_FOOT_SOUTH),
+            ("bed_foot_up", SOURCE_BED_FOOT_UP),
+            ("bed_foot_west", SOURCE_BED_FOOT_WEST),
+            ("bed_head_east", SOURCE_BED_HEAD_EAST),
+            ("bed_head_up", SOURCE_BED_HEAD_UP),
+            ("bed_head_west", SOURCE_BED_HEAD_WEST),
+        ]:
+            data = find_in_cache(src)
+            tmp = os.path.join(os.environ.get("TEMP", "."), "_sb_bed.png")
+            open(tmp, "wb").write(data)
+            w, h, srcpix = read_png(tmp)
+            dest = os.path.join(bed_dir, f"{color}_{name}.png") if color else os.path.join(bed_dir, f"{{cid}}_{name}.png")
+            if color:
+                from png import write_png as wp
+                trg = next(rgb for cid,_1,_2,rgb,_3 in COLORS if cid==color)
+                wp(dest, w, h, recolor(srcpix, trg, 128))
+                print(f"   {os.path.relpath(dest,ROOT)}")
+        sys.exit(0)
