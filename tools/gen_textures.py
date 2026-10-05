@@ -6,9 +6,12 @@ preserving the shading and the outline of the original sprite. Instead of painti
 a flat color, it measures how dark each pixel is relative to the dominant color of
 the source texture, then reproduces that same ratio using the destination color.
 
-    python tools/gen_textures.py            # everything
-    python tools/gen_textures.py dyes       # only the dyes
-    python tools/gen_textures.py plants     # only the plants
+    python tools/gen_textures.py                 # everything
+    python tools/gen_textures.py dyes            # only the dyes
+    python tools/gen_textures.py wool            # only the wool
+    python tools/gen_textures.py terracotta      # only the terracotta
+    python tools/gen_textures.py glass           # only the stained glass
+    python tools/gen_textures.py glass soft_terracotta   # one single color
 
 The source textures are read straight out of the ForgeGradle cache jar, so there
 is no need to extract them by hand.
@@ -60,6 +63,7 @@ SOURCE_DYE = "assets/minecraft/textures/item/white_dye.png"
 SOURCE_PLANT = "assets/minecraft/textures/item/pitcher_pod.png"
 SOURCE_WOOL = "assets/minecraft/textures/block/white_wool.png"
 SOURCE_TERRACOTTA = "assets/minecraft/textures/block/orange_terracotta.png"
+SOURCE_GLASS = "assets/minecraft/textures/block/orange_stained_glass.png"
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -93,23 +97,22 @@ def luminance(r, g, b):
     return 0.299 * r + 0.587 * g + 0.114 * b
 
 
-def dominant_color(pixels):
+def dominant_color(pixels, alpha_min=128):
     """Find the main flat color of a texture.
-
     Tints are mostly one solid color plus darker shading and an outline. The most
     frequent opaque color is that main color, and it is the reference point used to
     measure how dark every other pixel is.
     """
     counts = {}
     for i in range(0, len(pixels), 4):
-        if pixels[i + 3] < 128:
+        if pixels[i + 3] < alpha_min:
             continue  # skip transparent pixels
         key = pixels[i:i + 3]
         counts[key] = counts.get(key, 0) + 1
     return max(counts.items(), key=lambda kv: kv[1])[0]
 
 
-def recolor(src_pixels, target_rgb):
+def recolor(src_pixels, target_rgb, alpha_min=128):
     """Redraw a texture in the target color, keeping the original shading.
 
     For every pixel, work out how much darker it is than the dominant color
@@ -117,7 +120,7 @@ def recolor(src_pixels, target_rgb):
     shadow pixel keeps being a shadow, just in the new hue. Fully transparent
     pixels are copied untouched so the outline and the silhouette stay correct.
     """
-    base = dominant_color(src_pixels)
+    base = dominant_color(src_pixels, alpha_min)
     base_l = luminance(base[0], base[1], base[2]) or 1.0  # avoid divide by zero
     tr = (target_rgb >> 16) & 0xFF  # unpack 0xRRGGBB into R, G, B
     tg = (target_rgb >> 8) & 0xFF
@@ -125,7 +128,7 @@ def recolor(src_pixels, target_rgb):
 
     out = bytearray(src_pixels)
     for i in range(0, len(src_pixels), 4):
-        if src_pixels[i + 3] < 128:
+        if src_pixels[i + 3] < alpha_min:
             continue  # keep transparency as it is
         scale = luminance(src_pixels[i], src_pixels[i + 1], src_pixels[i + 2]) / base_l
         out[i] = max(0, min(255, round(tr * scale)))
@@ -134,13 +137,16 @@ def recolor(src_pixels, target_rgb):
     return bytes(out)
 
 
-def generate(kind, source_entry, folder, prefix, suffix="", only=None):
+def generate(kind, source_entry, folder, prefix, suffix="", only=None, alpha_min=128):
     """Recolor one vanilla texture into all 16 colors and save the results.
 
     kind          -> label printed in the console, e.g. "dyes"
     source_entry  -> path of the vanilla texture inside the cache jar
     folder        -> subfolder of assets/sniffer_blooms/textures to write into
     prefix/suffix -> wrapped around the color id to build the file name
+    only          -> color id to generate, None for all 16
+    alpha_min     -> lowest alpha value that still gets recolored. Glass is mostly
+                     semi transparent, so it needs 1 instead of the usual 128.
     """
     data = find_in_cache(source_entry)
     tmp = os.path.join(os.environ.get("TEMP", "."), "_sb_src.png")
@@ -155,7 +161,7 @@ def generate(kind, source_entry, folder, prefix, suffix="", only=None):
         if only and cid != only:
             continue
         dest = os.path.join(outdir, f"{prefix}{cid}{suffix}.png")
-        write_png(dest, w, h, recolor(src, rgb))
+        write_png(dest, w, h, recolor(src, rgb, alpha_min))
         print(f"   {os.path.relpath(dest, ROOT)}  #{rgb:06X}")
 
 
@@ -168,3 +174,5 @@ if __name__ == "__main__":
         generate("wool", SOURCE_WOOL, "block", "", "_wool", color)
     if what in ("all", "terracotta"):
         generate("terracotta", SOURCE_TERRACOTTA, "block", "", "_terracotta", color)
+    if what in ("all", "glass"):
+        generate("glass", SOURCE_GLASS, "block", "", "_stained_glass", color, 1)

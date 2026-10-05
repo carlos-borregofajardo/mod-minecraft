@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.block.WoolCarpetBlock;
+import net.minecraft.world.level.block.StainedGlassBlock;
 
 @Mod(SnifferBloomsMod.MODID)
 public final class SnifferBloomsMod {
@@ -59,6 +60,22 @@ public final class SnifferBloomsMod {
                 .strength(1.25F, 4.2F)
     ));
 
+    public static final RegistryObject<Block> SOFT_TERRACOTTA_STAINED_GLASS =
+        BLOCKS.register("soft_terracotta_stained_glass", () -> new StainedGlassBlock(
+            DyeColor.ORANGE,
+            BlockBehaviour.Properties.of()
+                .setId(BLOCKS.key("soft_terracotta_stained_glass"))
+                .mapColor(MapColor.TERRACOTTA_ORANGE)
+                .instrument(NoteBlockInstrument.HAT)
+                .strength(0.3F)
+                .sound(SoundType.GLASS)
+                .noOcclusion()
+                .isValidSpawn((state, level, pos, entityType) -> false)
+                .isRedstoneConductor((state, level, pos) -> false)
+                .isSuffocating((state, level, pos) -> false)
+                .isViewBlocking((state, level, pos) -> false)
+    ));
+
     //items
     public static final RegistryObject<Item> SOFT_TERRACOTTA_DYE =
         ITEMS.register("soft_terracotta_dye", () -> new DyeItem(
@@ -91,6 +108,14 @@ public final class SnifferBloomsMod {
                 .useBlockDescriptionPrefix()
     ));
 
+    public static final RegistryObject<Item> SOFT_TERRACOTTA_STAINED_GLASS_ITEM =
+        ITEMS.register("soft_terracotta_stained_glass", () -> new BlockItem(
+            SOFT_TERRACOTTA_STAINED_GLASS.get(),
+            new Item.Properties()
+                .setId(ITEMS.key("soft_terracotta_stained_glass"))
+                .useBlockDescriptionPrefix()
+    ));
+
 
 
     public SnifferBloomsMod(FMLJavaModLoadingContext context) {
@@ -107,6 +132,7 @@ public final class SnifferBloomsMod {
             event.accept(SOFT_TERRACOTTA_WOOL_ITEM);
             event.accept(SOFT_TERRACOTTA_CARPET_ITEM);
             event.accept(SOFT_TERRACOTTA_TERRACOTTA_ITEM);
+             event.accept(SOFT_TERRACOTTA_STAINED_GLASS_ITEM);
         }
     }
 }
