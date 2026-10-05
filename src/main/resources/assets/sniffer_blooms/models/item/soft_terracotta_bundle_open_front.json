@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/template_bundle_open_front",
+  "textures": {
+    "layer0": "sniffer_blooms:item/soft_terracotta_bundle_open_front"
+  }
+}

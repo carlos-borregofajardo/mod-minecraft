@@ -85,6 +85,9 @@ SOURCE_BED_HEAD_EAST = "assets/minecraft/textures/block/orange_bed_head_east.png
 SOURCE_BED_HEAD_UP = "assets/minecraft/textures/block/orange_bed_head_up.png"
 SOURCE_BED_HEAD_WEST = "assets/minecraft/textures/block/orange_bed_head_west.png"
 SOURCE_HARNESS = "assets/minecraft/textures/item/orange_harness.png"
+SOURCE_BUNDLE = "assets/minecraft/textures/item/orange_bundle.png"
+SOURCE_BUNDLE_OPEN_BACK = "assets/minecraft/textures/item/orange_bundle_open_back.png"
+SOURCE_BUNDLE_OPEN_FRONT = "assets/minecraft/textures/item/orange_bundle_open_front.png"
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -238,4 +241,10 @@ if __name__ == "__main__":
     if what in ("all", "harness"):
         os.makedirs(os.path.join(RES, "item"), exist_ok=True)
         generate("harness", SOURCE_HARNESS, "item", "", "_harness", color)
+        sys.exit(0)
+    if what in ("all", "bundle"):
+        os.makedirs(os.path.join(RES, "item"), exist_ok=True)
+        generate("bundle", SOURCE_BUNDLE, "item", "", "_bundle", color)
+        generate("bundle_back", SOURCE_BUNDLE_OPEN_BACK, "item", "", "_bundle_open_back", color)
+        generate("bundle_front", SOURCE_BUNDLE_OPEN_FRONT, "item", "", "_bundle_open_front", color)
         sys.exit(0)

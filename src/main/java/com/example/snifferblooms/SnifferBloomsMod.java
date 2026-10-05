@@ -265,6 +265,13 @@ public final class SnifferBloomsMod {
                 .component(net.minecraft.core.component.DataComponents.EQUIPPABLE, Equippable.harness(DyeColor.ORANGE))
     ));
 
+    public static final RegistryObject<Item> SOFT_TERRACOTTA_BUNDLE =
+        ITEMS.register("soft_terracotta_bundle", () -> new Item(
+            new Item.Properties()
+                .setId(ITEMS.key("soft_terracotta_bundle"))
+                .stacksTo(1)
+    ));
+
     public SnifferBloomsMod(FMLJavaModLoadingContext context) {
         BLOCKS.register(context.getModBusGroup());
         ITEMS.register(context.getModBusGroup());
@@ -287,6 +294,7 @@ public final class SnifferBloomsMod {
             event.accept(SOFT_TERRACOTTA_SHULKER_BOX_ITEM);
             event.accept(SOFT_TERRACOTTA_BED_ITEM);
             event.accept(SOFT_TERRACOTTA_HARNESS);
+            event.accept(SOFT_TERRACOTTA_BUNDLE);
         }
     }
 }
