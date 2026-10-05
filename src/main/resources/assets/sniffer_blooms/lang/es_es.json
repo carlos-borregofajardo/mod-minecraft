@@ -1,3 +1,6 @@
 {
-  "item.sniffer_blooms.soft_terracotta_dye": "Tinte Terracota Suave"
+  "item.sniffer_blooms.soft_terracotta_dye": "Tinte Terracota Suave",
+  "block.sniffer_blooms.soft_terracotta_wool": "Lana Terracota Suave",
+  "block.sniffer_blooms.soft_terracotta_carpet": "Alfombra Terracota Suave",
+  "block.sniffer_blooms.soft_terracotta_terracotta": "Terracota Suave"
 }

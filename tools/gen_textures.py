@@ -58,6 +58,9 @@ COLORS = [
 # blob shape, so recoloring white_dye gives us a correct silhouette for free.
 SOURCE_DYE = "assets/minecraft/textures/item/white_dye.png"
 SOURCE_PLANT = "assets/minecraft/textures/item/pitcher_pod.png"
+SOURCE_WOOL = "assets/minecraft/textures/block/white_wool.png"
+SOURCE_TERRACOTTA = "assets/minecraft/textures/block/orange_terracotta.png"
+
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(ROOT, "src", "main", "resources", "assets", "sniffer_blooms", "textures")
@@ -131,7 +134,7 @@ def recolor(src_pixels, target_rgb):
     return bytes(out)
 
 
-def generate(kind, source_entry, folder, prefix, suffix=""):
+def generate(kind, source_entry, folder, prefix, suffix="", only=None):
     """Recolor one vanilla texture into all 16 colors and save the results.
 
     kind          -> label printed in the console, e.g. "dyes"
@@ -149,6 +152,8 @@ def generate(kind, source_entry, folder, prefix, suffix=""):
     print(f"[{kind}] base {source_entry} ({w}x{h}) -> {outdir}")
 
     for cid, _name_es, _name_en, rgb, _vanilla in COLORS:
+        if only and cid != only:
+            continue
         dest = os.path.join(outdir, f"{prefix}{cid}{suffix}.png")
         write_png(dest, w, h, recolor(src, rgb))
         print(f"   {os.path.relpath(dest, ROOT)}  #{rgb:06X}")
@@ -156,7 +161,10 @@ def generate(kind, source_entry, folder, prefix, suffix=""):
 
 if __name__ == "__main__":
     what = sys.argv[1] if len(sys.argv) > 1 else "all"
+    color = sys.argv[2] if len(sys.argv) > 2 else None
     if what in ("all", "dyes"):
-        generate("dyes", SOURCE_DYE, "item", "", "_dye")
-    if what in ("all", "plants"):
-        generate("plants", SOURCE_PLANT, "item", "plant_")
+        generate("dyes", SOURCE_DYE, "item", "", "_dye", color)
+    if what in ("all", "wool"):
+        generate("wool", SOURCE_WOOL, "block", "", "_wool", color)
+    if what in ("all", "terracotta"):
+        generate("terracotta", SOURCE_TERRACOTTA, "block", "", "_terracotta", color)

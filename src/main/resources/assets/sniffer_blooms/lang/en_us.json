@@ -1,3 +1,6 @@
 {
-  "item.sniffer_blooms.soft_terracotta_dye": "Soft Terracotta Dye"
+  "item.sniffer_blooms.soft_terracotta_dye": "Soft Terracotta Dye",
+  "block.sniffer_blooms.soft_terracotta_wool": "Soft Terracotta Wool",
+  "block.sniffer_blooms.soft_terracotta_carpet": "Soft Terracotta Carpet",
+  "block.sniffer_blooms.soft_terracotta_terracotta": "Soft Terracotta"
 }
