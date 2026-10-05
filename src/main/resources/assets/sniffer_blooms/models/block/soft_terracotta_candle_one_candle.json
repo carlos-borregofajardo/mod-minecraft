@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_candle",
+  "textures": {
+    "all": "sniffer_blooms:block/soft_terracotta_candle",
+    "particle": "sniffer_blooms:block/soft_terracotta_candle"
+  }
+}

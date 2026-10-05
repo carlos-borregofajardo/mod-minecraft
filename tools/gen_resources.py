@@ -1,19 +1,23 @@
 """
 JSON resource generator for Sniffer Blooms.
 
-Writes every data file the game needs to display and use the 16 dyes:
-item definitions, item models, translations, and the two vanilla recipe overrides.
+Writes the data files the game needs to display and use the 16 dyes: item
+definitions, item models and the two vanilla recipe overrides.
 
     python tools/gen_resources.py
 
 Output:
   assets/sniffer_blooms/items/<id>_dye.json       item definition
   assets/sniffer_blooms/models/item/<id>_dye.json item model
-  assets/sniffer_blooms/lang/es_es.json           Spanish names
-  assets/sniffer_blooms/lang/en_us.json           English names
   data/minecraft/recipe/*_from_*.json             overridden vanilla recipes
 
 Do not edit the generated files by hand, they get overwritten on every run.
+
+The translation files are NOT generated here, they are edited by hand. This script
+used to write lang/en_us.json and lang/es_es.json from scratch, which wiped out
+every block name that had been added to them, because the blocks are registered one
+by one and only the dyes were listed below. Keep it that way: add new names to
+lang/en_us.json and lang/es_es.json manually.
 """
 
 import json
@@ -88,15 +92,15 @@ def gen_models():
 
 
 def gen_lang():
-    """Write the translation files for Spanish and English.
+    """Removed on purpose, see the note at the top of the file.
 
-    The key is derived from the item id, so item.sniffer_blooms.soft_terracotta_dye
-    is what makes "Tinte Terracota Suave" appear under the icon.
+    It rewrote both lang files from scratch, so running the script deleted the name of
+    every block that had been added to them. Translations are maintained by hand now.
     """
-    print("[lang]")
-    for lang, idx in (("es_es", 1), ("en_us", 2)):
-        data = {f"item.{NS}.{cid}_dye": row[idx] for row in COLORS for cid in [row[0]]}
-        write(os.path.join(ASSETS, "lang", f"{lang}.json"), data)
+    raise SystemExit(
+        "gen_lang() esta deshabilitado a proposito: las traducciones se editan a mano "
+        "en assets/sniffer_blooms/lang/en_us.json y es_es.json"
+    )
 
 
 # The two vanilla plants are repurposed so their recipes yield our first two dyes.
@@ -130,6 +134,5 @@ def gen_recipe_overrides():
 if __name__ == "__main__":
     gen_item_defs()
     gen_models()
-    gen_lang()
     gen_recipe_overrides()
     print("listo")

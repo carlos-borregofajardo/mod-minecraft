@@ -11,6 +11,12 @@ the source texture, then reproduces that same ratio using the destination color.
     python tools/gen_textures.py wool            # only the wool
     python tools/gen_textures.py terracotta      # only the terracotta
     python tools/gen_textures.py glass           # only the stained glass
+    python tools/gen_textures.py pane            # only the stained glass pane cap
+    python tools/gen_textures.py concrete        # only the solid concrete
+    python tools/gen_textures.py concrete_powder # only the concrete powder
+    python tools/gen_textures.py candle          # only the unlit candle wax
+    python tools/gen_textures.py candle_lit      # only the lit candle wax
+    python tools/gen_textures.py candle_item     # only the candle item icon
     python tools/gen_textures.py glass soft_terracotta   # one single color
 
 The source textures are read straight out of the ForgeGradle cache jar, so there
@@ -64,6 +70,13 @@ SOURCE_PLANT = "assets/minecraft/textures/item/pitcher_pod.png"
 SOURCE_WOOL = "assets/minecraft/textures/block/white_wool.png"
 SOURCE_TERRACOTTA = "assets/minecraft/textures/block/orange_terracotta.png"
 SOURCE_GLASS = "assets/minecraft/textures/block/orange_stained_glass.png"
+SOURCE_PANE = "assets/minecraft/textures/block/orange_stained_glass_pane_top.png"
+SOURCE_CONCRETE = "assets/minecraft/textures/block/orange_concrete.png"
+SOURCE_CONCRETE_POWDER = "assets/minecraft/textures/block/orange_concrete_powder.png"
+SOURCE_CANDLE = "assets/minecraft/textures/block/orange_candle.png"
+SOURCE_CANDLE_LIT = "assets/minecraft/textures/block/orange_candle_lit.png"
+SOURCE_CANDLE_ITEM = "assets/minecraft/textures/item/orange_candle.png"
+SOURCE_SHULKER = "assets/minecraft/textures/entity/shulker/shulker_white.png"
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -176,3 +189,18 @@ if __name__ == "__main__":
         generate("terracotta", SOURCE_TERRACOTTA, "block", "", "_terracotta", color)
     if what in ("all", "glass"):
         generate("glass", SOURCE_GLASS, "block", "", "_stained_glass", color, 1)
+    if what in ("all", "pane"):
+        generate("pane", SOURCE_PANE, "block", "", "_stained_glass_pane_top", color)
+    if what in ("all", "concrete"):
+        generate("concrete", SOURCE_CONCRETE, "block", "", "_concrete", color)
+    if what in ("all", "concrete_powder"):
+        generate("concrete_powder", SOURCE_CONCRETE_POWDER, "block", "", "_concrete_powder", color)
+    if what in ("all", "candle"):
+        generate("candle", SOURCE_CANDLE, "block", "", "_candle", color)
+    if what in ("all", "candle_lit"):
+        generate("candle_lit", SOURCE_CANDLE_LIT, "block", "", "_candle_lit", color)
+    if what in ("all", "candle_item"):
+        generate("candle_item", SOURCE_CANDLE_ITEM, "item", "", "_candle", color)
+    if what in ("all", "shulker"):
+        os.makedirs(os.path.join(RES, "entity", "shulker"), exist_ok=True)
+        generate("shulker", SOURCE_SHULKER, "entity/shulker", "shulker_", "", color)
