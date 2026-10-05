@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.block.WoolCarpetBlock;
 import net.minecraft.world.level.block.StainedGlassBlock;
@@ -256,6 +257,14 @@ public final class SnifferBloomsMod {
                 .useBlockDescriptionPrefix()
     ));
 
+    public static final RegistryObject<Item> SOFT_TERRACOTTA_HARNESS =
+        ITEMS.register("soft_terracotta_harness", () -> new Item(
+            new Item.Properties()
+                .setId(ITEMS.key("soft_terracotta_harness"))
+                .stacksTo(1)
+                .component(net.minecraft.core.component.DataComponents.EQUIPPABLE, Equippable.harness(DyeColor.ORANGE))
+    ));
+
     public SnifferBloomsMod(FMLJavaModLoadingContext context) {
         BLOCKS.register(context.getModBusGroup());
         ITEMS.register(context.getModBusGroup());
@@ -277,6 +286,7 @@ public final class SnifferBloomsMod {
             event.accept(SOFT_TERRACOTTA_CANDLE_ITEM);
             event.accept(SOFT_TERRACOTTA_SHULKER_BOX_ITEM);
             event.accept(SOFT_TERRACOTTA_BED_ITEM);
+            event.accept(SOFT_TERRACOTTA_HARNESS);
         }
     }
 }

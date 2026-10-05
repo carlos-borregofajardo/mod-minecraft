@@ -84,6 +84,7 @@ SOURCE_BED_FOOT_WEST = "assets/minecraft/textures/block/orange_bed_foot_west.png
 SOURCE_BED_HEAD_EAST = "assets/minecraft/textures/block/orange_bed_head_east.png"
 SOURCE_BED_HEAD_UP = "assets/minecraft/textures/block/orange_bed_head_up.png"
 SOURCE_BED_HEAD_WEST = "assets/minecraft/textures/block/orange_bed_head_west.png"
+SOURCE_HARNESS = "assets/minecraft/textures/item/orange_harness.png"
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -233,4 +234,8 @@ if __name__ == "__main__":
                 trg = next(rgb for cid,_1,_2,rgb,_3 in COLORS if cid==color)
                 wp(dest, w, h, recolor(srcpix, trg, 128))
                 print(f"   {os.path.relpath(dest,ROOT)}")
+        sys.exit(0)
+    if what in ("all", "harness"):
+        os.makedirs(os.path.join(RES, "item"), exist_ok=True)
+        generate("harness", SOURCE_HARNESS, "item", "", "_harness", color)
         sys.exit(0)
