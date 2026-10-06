@@ -10,7 +10,28 @@
         "type": "minecraft:model",
         "model": "sniffer_blooms:block/soft_terracotta_bed_foot",
         "transformation": {
-          "translation": [0.0, 0.0, 1.0]
+          "left_rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "right_rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "translation": [
+            0.0,
+            0.0,
+            1.0
+          ]
         }
       }
     ]
