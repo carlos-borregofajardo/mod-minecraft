@@ -18,6 +18,7 @@ the source texture, then reproduces that same ratio using the destination color.
     python tools/gen_textures.py candle_lit      # only the lit candle wax
     python tools/gen_textures.py candle_item     # only the candle item icon
     python tools/gen_textures.py glass soft_terracotta   # one single color
+    python tools/gen_textures.py bed soft_terracotta     # only the bed blanket
 
 The source textures are read straight out of the ForgeGradle cache jar, so there
 is no need to extract them by hand.
@@ -77,13 +78,13 @@ SOURCE_CANDLE = "assets/minecraft/textures/block/orange_candle.png"
 SOURCE_CANDLE_LIT = "assets/minecraft/textures/block/orange_candle_lit.png"
 SOURCE_CANDLE_ITEM = "assets/minecraft/textures/item/orange_candle.png"
 SOURCE_SHULKER = "assets/minecraft/textures/entity/shulker/shulker_white.png"
-SOURCE_BED_FOOT_EAST = "assets/minecraft/textures/block/orange_bed_foot_east.png"
-SOURCE_BED_FOOT_SOUTH = "assets/minecraft/textures/block/orange_bed_foot_south.png"
-SOURCE_BED_FOOT_UP = "assets/minecraft/textures/block/orange_bed_foot_up.png"
-SOURCE_BED_FOOT_WEST = "assets/minecraft/textures/block/orange_bed_foot_west.png"
-SOURCE_BED_HEAD_EAST = "assets/minecraft/textures/block/orange_bed_head_east.png"
-SOURCE_BED_HEAD_UP = "assets/minecraft/textures/block/orange_bed_head_up.png"
-SOURCE_BED_HEAD_WEST = "assets/minecraft/textures/block/orange_bed_head_west.png"
+SOURCE_BED_FOOT_EAST = "assets/minecraft/textures/block/red_bed_foot_east.png"
+SOURCE_BED_FOOT_SOUTH = "assets/minecraft/textures/block/red_bed_foot_south.png"
+SOURCE_BED_FOOT_UP = "assets/minecraft/textures/block/red_bed_foot_up.png"
+SOURCE_BED_FOOT_WEST = "assets/minecraft/textures/block/red_bed_foot_west.png"
+SOURCE_BED_HEAD_EAST = "assets/minecraft/textures/block/red_bed_head_east.png"
+SOURCE_BED_HEAD_UP = "assets/minecraft/textures/block/red_bed_head_up.png"
+SOURCE_BED_HEAD_WEST = "assets/minecraft/textures/block/red_bed_head_west.png"
 SOURCE_HARNESS = "assets/minecraft/textures/item/orange_harness.png"
 SOURCE_BUNDLE = "assets/minecraft/textures/item/orange_bundle.png"
 SOURCE_BUNDLE_OPEN_BACK = "assets/minecraft/textures/item/orange_bundle_open_back.png"
@@ -161,6 +162,94 @@ def recolor(src_pixels, target_rgb, alpha_min=128):
     return bytes(out)
 
 
+# --- Bed textures: blanket-only recolor ------------------------------------
+# Vanilla beds share one wooden frame (brown) and one white pillow across every
+# color; only the blanket differs. Recoloring the whole sprite stained the wood
+# and pillow too, which looked wrong. Instead we repaint only the pixels whose
+# hue/saturation match the blanket (a red bed has a cleanly separated red
+# blanket), leaving the browns and whites untouched.
+#
+# The blanket band is defined by hue and saturation: the red blanket pixels sit
+# at H ~ 0-5 with S >= 0.77, the brown wood at H ~ 35-40 and the white pillow
+# at S <= 0.1, so this band cleanly hits only the blanket.
+BED_RED_HUE_MAX = 12.0
+BED_RED_HUE_MIN = 348.0  # hue wraps around 360, so the red band is [348, 360) U [0, 12]
+BED_RED_SAT_MIN = 0.35
+# Lightest blanket pixel in red_bed is #B53129 (V=181/255); map it onto the dye
+# color itself so the brightest blanket pixel matches the dye, keeping shading.
+BED_SOURCE_RED_V = 181.0 / 255.0
+
+
+def rgb_to_hsv(r, g, b):
+    """Standard RGB -> HSV, hue in 0..360, sat/val in 0..1."""
+    r /= 255.0
+    g /= 255.0
+    b /= 255.0
+    mx = max(r, g, b)
+    mn = min(r, g, b)
+    d = mx - mn
+    v = mx
+    s = 0.0 if mx == 0 else d / mx
+    h = 0.0
+    if d > 0:
+        if mx == r:
+            h = 60.0 * (((g - b) / d) % 6)
+        elif mx == g:
+            h = 60.0 * (((b - r) / d) + 2)
+        else:
+            h = 60.0 * (((r - g) / d) + 4)
+    if h < 0:
+        h += 360.0
+    return h, s, v
+
+
+def hsv_to_rgb(h, s, v):
+    """Standard HSV -> RGB, h in 0..360, s/v in 0..1. Returns (r, g, b) ints."""
+    c = v * s
+    x = c * (1.0 - abs((h / 60.0) % 2.0 - 1.0))
+    m = v - c
+    if h < 60:
+        r, g, b = c, x, 0.0
+    elif h < 120:
+        r, g, b = x, c, 0.0
+    elif h < 180:
+        r, g, b = 0.0, c, x
+    elif h < 240:
+        r, g, b = 0.0, x, c
+    elif h < 300:
+        r, g, b = x, 0.0, c
+    else:
+        r, g, b = c, 0.0, x
+    return round((r + m) * 255), round((g + m) * 255), round((b + m) * 255)
+
+
+def recolor_bed(src_pixels, target_rgb, alpha_min=128):
+    """Repaint only the blanket of a bed sprite in the target dye color.
+
+    Keeps the wooden frame (brown) and the pillow (white) exactly as they are;
+    only pixels in the blanket hue/saturation band get the new color. The hue
+    and saturation come from the dye, and each blanket pixel keeps its own
+    brightness (scaled so the lightest blanket pixel equals the dye color).
+    """
+    tr = (target_rgb >> 16) & 0xFF
+    tg = (target_rgb >> 8) & 0xFF
+    tb = target_rgb & 0xFF
+    th, ts, _tv = rgb_to_hsv(tr, tg, tb)
+    vs = _tv / BED_SOURCE_RED_V
+
+    out = bytearray(src_pixels)
+    for i in range(0, len(src_pixels), 4):
+        if src_pixels[i + 3] < alpha_min:
+            continue  # keep transparency as it is
+        h, s, v = rgb_to_hsv(src_pixels[i], src_pixels[i + 1], src_pixels[i + 2])
+        is_blanket = s >= BED_RED_SAT_MIN and (h <= BED_RED_HUE_MAX or h >= BED_RED_HUE_MIN)
+        if not is_blanket:
+            continue  # wood frame and pillow stay untouched
+        nr, ng, nb = hsv_to_rgb(th, ts, min(1.0, v * vs))
+        out[i], out[i + 1], out[i + 2] = nr, ng, nb
+    return bytes(out)
+
+
 def generate(kind, source_entry, folder, prefix, suffix="", only=None, alpha_min=128):
     """Recolor one vanilla texture into all 16 colors and save the results.
 
@@ -231,12 +320,12 @@ if __name__ == "__main__":
             tmp = os.path.join(os.environ.get("TEMP", "."), "_sb_bed.png")
             open(tmp, "wb").write(data)
             w, h, srcpix = read_png(tmp)
-            dest = os.path.join(bed_dir, f"{color}_{name}.png") if color else os.path.join(bed_dir, f"{{cid}}_{name}.png")
-            if color:
-                from png import write_png as wp
-                trg = next(rgb for cid,_1,_2,rgb,_3 in COLORS if cid==color)
-                wp(dest, w, h, recolor(srcpix, trg, 128))
-                print(f"   {os.path.relpath(dest,ROOT)}")
+            for cid, _name_es, _name_en, rgb, _vanilla in COLORS:
+                if color and cid != color:
+                    continue
+                dest = os.path.join(bed_dir, f"{cid}_{name}.png")
+                write_png(dest, w, h, recolor_bed(srcpix, rgb))
+                print(f"   {os.path.relpath(dest, ROOT)}  #{rgb:06X}")
         sys.exit(0)
     if what in ("all", "harness"):
         os.makedirs(os.path.join(RES, "item"), exist_ok=True)

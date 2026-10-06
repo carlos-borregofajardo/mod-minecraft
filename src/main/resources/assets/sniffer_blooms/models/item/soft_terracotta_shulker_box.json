@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/template_shulker_box",
   "textures": {
-    "particle": "sniffer_blooms:entity/shulker/soft_terracotta_shulker_box"
+    "particle": "sniffer_blooms:entity/shulker/shulker_soft_terracotta"
   }
 }

@@ -1,5 +1,8 @@
 package com.example.snifferblooms;
 
+import com.example.snifferblooms.block.SoftTerracottaShulkerBoxBlock;
+import com.example.snifferblooms.block.entity.SoftTerracottaShulkerBoxBlockEntity;
+import com.example.snifferblooms.client.renderer.SoftTerracottaShulkerBoxRenderer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.DyeColor;
@@ -27,7 +30,11 @@ import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.CandleCakeBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 
 @Mod(SnifferBloomsMod.MODID)
 public final class SnifferBloomsMod {
@@ -35,8 +42,9 @@ public final class SnifferBloomsMod {
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
-    
-    //blocks
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
+
+    // blocks
     public static final RegistryObject<Block> SOFT_TERRACOTTA_WOOL =
         BLOCKS.register("soft_terracotta_wool", () -> new Block(
             BlockBehaviour.Properties.of()
@@ -46,7 +54,7 @@ public final class SnifferBloomsMod {
                 .strength(0.8F)
                 .sound(SoundType.WOOL)
                 .ignitedByLava()
-    ));
+        ));
 
     public static final RegistryObject<Block> SOFT_TERRACOTTA_CARPET =
         BLOCKS.register("soft_terracotta_carpet", () -> new WoolCarpetBlock(
@@ -57,7 +65,7 @@ public final class SnifferBloomsMod {
                 .strength(0.1F)
                 .sound(SoundType.WOOL)
                 .ignitedByLava()
-    ));
+        ));
 
     public static final RegistryObject<Block> SOFT_TERRACOTTA_TERRACOTTA =
         BLOCKS.register("soft_terracotta_terracotta", () -> new Block(
@@ -67,7 +75,7 @@ public final class SnifferBloomsMod {
                 .instrument(NoteBlockInstrument.BASEDRUM)
                 .requiresCorrectToolForDrops()
                 .strength(1.25F, 4.2F)
-    ));
+        ));
 
     public static final RegistryObject<Block> SOFT_TERRACOTTA_STAINED_GLASS =
         BLOCKS.register("soft_terracotta_stained_glass", () -> new StainedGlassBlock(
@@ -83,7 +91,7 @@ public final class SnifferBloomsMod {
                 .isRedstoneConductor((state, level, pos) -> false)
                 .isSuffocating((state, level, pos) -> false)
                 .isViewBlocking((state, level, pos) -> false)
-    ));
+        ));
 
     public static final RegistryObject<Block> SOFT_TERRACOTTA_STAINED_GLASS_PANE =
         BLOCKS.register("soft_terracotta_stained_glass_pane", () -> new StainedGlassPaneBlock(
@@ -95,7 +103,7 @@ public final class SnifferBloomsMod {
                 .strength(0.3F)
                 .sound(SoundType.GLASS)
                 .noOcclusion()
-    ));
+        ));
 
     public static final RegistryObject<Block> SOFT_TERRACOTTA_CONCRETE =
         BLOCKS.register("soft_terracotta_concrete", () -> new Block(
@@ -105,7 +113,7 @@ public final class SnifferBloomsMod {
                 .instrument(NoteBlockInstrument.BASEDRUM)
                 .requiresCorrectToolForDrops()
                 .strength(1.8F)
-    ));
+        ));
 
     public static final RegistryObject<Block> SOFT_TERRACOTTA_CONCRETE_POWDER =
         BLOCKS.register("soft_terracotta_concrete_powder", () -> new ConcretePowderBlock(
@@ -116,7 +124,7 @@ public final class SnifferBloomsMod {
                 .instrument(NoteBlockInstrument.SNARE)
                 .strength(0.5F)
                 .sound(SoundType.SAND)
-    ));
+        ));
 
     public static final RegistryObject<Block> SOFT_TERRACOTTA_CANDLE =
         BLOCKS.register("soft_terracotta_candle", () -> new CandleBlock(
@@ -128,7 +136,7 @@ public final class SnifferBloomsMod {
                 .sound(SoundType.CANDLE)
                 .lightLevel(CandleBlock.LIGHT_EMISSION)
                 .pushReaction(PushReaction.DESTROY)
-    ));
+        ));
 
     public static final RegistryObject<Block> SOFT_TERRACOTTA_CANDLE_CAKE =
         BLOCKS.register("soft_terracotta_candle_cake", () -> new CandleCakeBlock(
@@ -140,10 +148,10 @@ public final class SnifferBloomsMod {
                 .sound(SoundType.WOOL)
                 .pushReaction(PushReaction.DESTROY)
                 .lightLevel(state -> state.getValue(CandleCakeBlock.LIT) ? 3 : 0)
-    ));
+        ));
 
     public static final RegistryObject<Block> SOFT_TERRACOTTA_SHULKER_BOX =
-        BLOCKS.register("soft_terracotta_shulker_box", () -> new ShulkerBoxBlock(
+        BLOCKS.register("soft_terracotta_shulker_box", () -> new SoftTerracottaShulkerBoxBlock(
             DyeColor.ORANGE,
             BlockBehaviour.Properties.of()
                 .setId(BLOCKS.key("soft_terracotta_shulker_box"))
@@ -155,7 +163,11 @@ public final class SnifferBloomsMod {
                 .isSuffocating((state, level, pos) -> level.getBlockEntity(pos) instanceof ShulkerBoxBlockEntity s ? s.isClosed() : true)
                 .isViewBlocking((state, level, pos) -> level.getBlockEntity(pos) instanceof ShulkerBoxBlockEntity s ? s.isClosed() : true)
                 .pushReaction(PushReaction.DESTROY)
-    ));
+        ));
+
+    public static final RegistryObject<BlockEntityType<SoftTerracottaShulkerBoxBlockEntity>> SOFT_TERRACOTTA_SHULKER_BOX_ENTITY =
+        BLOCK_ENTITY_TYPES.register("soft_terracotta_shulker_box",
+            () -> new BlockEntityType<>(SoftTerracottaShulkerBoxBlockEntity::new, java.util.Set.of(SOFT_TERRACOTTA_SHULKER_BOX.get())));
 
     public static final RegistryObject<Block> SOFT_TERRACOTTA_BED =
         BLOCKS.register("soft_terracotta_bed", () -> new BedBlock(
@@ -167,15 +179,15 @@ public final class SnifferBloomsMod {
                 .sound(SoundType.WOOD)
                 .ignitedByLava()
                 .noOcclusion()
-    ));
+        ));
 
-    //items
+    // items
     public static final RegistryObject<Item> SOFT_TERRACOTTA_DYE =
         ITEMS.register("soft_terracotta_dye", () -> new DyeItem(
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_dye"))
                 .component(DataComponents.DYE, DyeColor.ORANGE)
-    ));
+        ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_WOOL_ITEM =
         ITEMS.register("soft_terracotta_wool", () -> new BlockItem(
@@ -183,7 +195,7 @@ public final class SnifferBloomsMod {
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_wool"))
                 .useBlockDescriptionPrefix()
-    ));
+        ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_CARPET_ITEM =
         ITEMS.register("soft_terracotta_carpet", () -> new BlockItem(
@@ -191,15 +203,15 @@ public final class SnifferBloomsMod {
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_carpet"))
                 .useBlockDescriptionPrefix()
-    ));
+        ));
 
-     public static final RegistryObject<Item> SOFT_TERRACOTTA_TERRACOTTA_ITEM =
+    public static final RegistryObject<Item> SOFT_TERRACOTTA_TERRACOTTA_ITEM =
         ITEMS.register("soft_terracotta_terracotta", () -> new BlockItem(
             SOFT_TERRACOTTA_TERRACOTTA.get(),
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_terracotta"))
                 .useBlockDescriptionPrefix()
-    ));
+        ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_STAINED_GLASS_ITEM =
         ITEMS.register("soft_terracotta_stained_glass", () -> new BlockItem(
@@ -207,7 +219,7 @@ public final class SnifferBloomsMod {
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_stained_glass"))
                 .useBlockDescriptionPrefix()
-    ));
+        ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_STAINED_GLASS_PANE_ITEM =
         ITEMS.register("soft_terracotta_stained_glass_pane", () -> new BlockItem(
@@ -215,7 +227,7 @@ public final class SnifferBloomsMod {
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_stained_glass_pane"))
                 .useBlockDescriptionPrefix()
-    ));
+        ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_CONCRETE_ITEM =
         ITEMS.register("soft_terracotta_concrete", () -> new BlockItem(
@@ -223,7 +235,7 @@ public final class SnifferBloomsMod {
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_concrete"))
                 .useBlockDescriptionPrefix()
-    ));
+        ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_CONCRETE_POWDER_ITEM =
         ITEMS.register("soft_terracotta_concrete_powder", () -> new BlockItem(
@@ -231,7 +243,7 @@ public final class SnifferBloomsMod {
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_concrete_powder"))
                 .useBlockDescriptionPrefix()
-    ));
+        ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_CANDLE_ITEM =
         ITEMS.register("soft_terracotta_candle", () -> new BlockItem(
@@ -239,7 +251,7 @@ public final class SnifferBloomsMod {
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_candle"))
                 .useBlockDescriptionPrefix()
-    ));
+        ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_SHULKER_BOX_ITEM =
         ITEMS.register("soft_terracotta_shulker_box", () -> new BlockItem(
@@ -247,7 +259,7 @@ public final class SnifferBloomsMod {
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_shulker_box"))
                 .useBlockDescriptionPrefix()
-    ));
+        ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_BED_ITEM =
         ITEMS.register("soft_terracotta_bed", () -> new BlockItem(
@@ -255,7 +267,7 @@ public final class SnifferBloomsMod {
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_bed"))
                 .useBlockDescriptionPrefix()
-    ));
+        ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_HARNESS =
         ITEMS.register("soft_terracotta_harness", () -> new Item(
@@ -263,22 +275,32 @@ public final class SnifferBloomsMod {
                 .setId(ITEMS.key("soft_terracotta_harness"))
                 .stacksTo(1)
                 .component(net.minecraft.core.component.DataComponents.EQUIPPABLE, Equippable.harness(DyeColor.ORANGE))
-    ));
+        ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_BUNDLE =
         ITEMS.register("soft_terracotta_bundle", () -> new Item(
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_bundle"))
                 .stacksTo(1)
-    ));
+        ));
 
     public SnifferBloomsMod(FMLJavaModLoadingContext context) {
         BLOCKS.register(context.getModBusGroup());
         ITEMS.register(context.getModBusGroup());
+        BLOCK_ENTITY_TYPES.register(context.getModBusGroup());
         BuildCreativeModeTabContentsEvent.BUS.addListener(this::addCreativeTabItems);
+
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            EntityRenderersEvent.RegisterRenderers.BUS.addListener(event ->
+                event.registerBlockEntityRenderer(
+                    SOFT_TERRACOTTA_SHULKER_BOX_ENTITY.get(),
+                    SoftTerracottaShulkerBoxRenderer::new
+                )
+            );
+        }
     }
 
-      private void addCreativeTabItems(BuildCreativeModeTabContentsEvent event) {
+    private void addCreativeTabItems(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(SOFT_TERRACOTTA_DYE);
         }
