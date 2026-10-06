@@ -4,6 +4,7 @@ import com.example.snifferblooms.block.SoftTerracottaShulkerBoxBlock;
 import com.example.snifferblooms.block.entity.SoftTerracottaShulkerBoxBlockEntity;
 import com.example.snifferblooms.client.renderer.SoftTerracottaShulkerBoxRenderer;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
@@ -278,10 +279,11 @@ public final class SnifferBloomsMod {
         ));
 
     public static final RegistryObject<Item> SOFT_TERRACOTTA_BUNDLE =
-        ITEMS.register("soft_terracotta_bundle", () -> new Item(
+        ITEMS.register("soft_terracotta_bundle", () -> new BundleItem(
             new Item.Properties()
                 .setId(ITEMS.key("soft_terracotta_bundle"))
                 .stacksTo(1)
+                .component(DataComponents.BUNDLE_CONTENTS, net.minecraft.world.item.component.BundleContents.EMPTY)
         ));
 
     public SnifferBloomsMod(FMLJavaModLoadingContext context) {
