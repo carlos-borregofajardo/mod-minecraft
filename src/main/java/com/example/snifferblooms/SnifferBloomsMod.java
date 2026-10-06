@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.ConcretePowderBlock;
 import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.CandleCakeBlock;
+import net.minecraft.world.level.block.GlazedTerracottaBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -72,6 +73,16 @@ public final class SnifferBloomsMod {
         BLOCKS.register("soft_terracotta_terracotta", () -> new Block(
             BlockBehaviour.Properties.of()
                 .setId(BLOCKS.key("soft_terracotta_terracotta"))
+                .mapColor(MapColor.TERRACOTTA_ORANGE)
+                .instrument(NoteBlockInstrument.BASEDRUM)
+                .requiresCorrectToolForDrops()
+                .strength(1.25F, 4.2F)
+        ));
+
+    public static final RegistryObject<Block> SOFT_TERRACOTTA_GLAZED_TERRACOTTA =
+        BLOCKS.register("soft_terracotta_glazed_terracotta", () -> new GlazedTerracottaBlock(
+            BlockBehaviour.Properties.of()
+                .setId(BLOCKS.key("soft_terracotta_glazed_terracotta"))
                 .mapColor(MapColor.TERRACOTTA_ORANGE)
                 .instrument(NoteBlockInstrument.BASEDRUM)
                 .requiresCorrectToolForDrops()
@@ -214,6 +225,14 @@ public final class SnifferBloomsMod {
                 .useBlockDescriptionPrefix()
         ));
 
+    public static final RegistryObject<Item> SOFT_TERRACOTTA_GLAZED_TERRACOTTA_ITEM =
+        ITEMS.register("soft_terracotta_glazed_terracotta", () -> new BlockItem(
+            SOFT_TERRACOTTA_GLAZED_TERRACOTTA.get(),
+            new Item.Properties()
+                .setId(ITEMS.key("soft_terracotta_glazed_terracotta"))
+                .useBlockDescriptionPrefix()
+        ));
+
     public static final RegistryObject<Item> SOFT_TERRACOTTA_STAINED_GLASS_ITEM =
         ITEMS.register("soft_terracotta_stained_glass", () -> new BlockItem(
             SOFT_TERRACOTTA_STAINED_GLASS.get(),
@@ -310,6 +329,7 @@ public final class SnifferBloomsMod {
             event.accept(SOFT_TERRACOTTA_WOOL_ITEM);
             event.accept(SOFT_TERRACOTTA_CARPET_ITEM);
             event.accept(SOFT_TERRACOTTA_TERRACOTTA_ITEM);
+            event.accept(SOFT_TERRACOTTA_GLAZED_TERRACOTTA_ITEM);
             event.accept(SOFT_TERRACOTTA_STAINED_GLASS_ITEM);
             event.accept(SOFT_TERRACOTTA_STAINED_GLASS_PANE_ITEM);
             event.accept(SOFT_TERRACOTTA_CONCRETE_ITEM);

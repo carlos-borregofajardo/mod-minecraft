@@ -89,6 +89,7 @@ SOURCE_HARNESS = "assets/minecraft/textures/item/orange_harness.png"
 SOURCE_BUNDLE = "assets/minecraft/textures/item/orange_bundle.png"
 SOURCE_BUNDLE_OPEN_BACK = "assets/minecraft/textures/item/orange_bundle_open_back.png"
 SOURCE_BUNDLE_OPEN_FRONT = "assets/minecraft/textures/item/orange_bundle_open_front.png"
+SOURCE_GLAZED_TERRACOTTA = "assets/minecraft/textures/block/{color}_glazed_terracotta.png"
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -250,6 +251,49 @@ def recolor_bed(src_pixels, target_rgb, alpha_min=128):
     return bytes(out)
 
 
+def dominant_colors(pixels, n=2, alpha_min=128):
+    """Return the top-n most frequent opaque colors in the texture."""
+    counts = {}
+    for i in range(0, len(pixels), 4):
+        if pixels[i + 3] < alpha_min:
+            continue
+        key = (pixels[i], pixels[i + 1], pixels[i + 2])
+        counts[key] = counts.get(key, 0) + 1
+    return [c for c, _ in sorted(counts.items(), key=lambda kv: -kv[1])[:n]]
+
+
+def recolor_glazed(src_pixels, target_rgb, vanilla_dye_rgb, alpha_min=128):
+    """
+    Recolor a glazed terracotta texture by swapping its two main colors.
+
+    The vanilla glazed texture has two dominant colors (pattern + background).
+    We map:
+      - most common color -> target_rgb (our mod color)
+      - second most common -> vanilla_dye_rgb (the vanilla dye color)
+    This preserves the pattern structure while using our palette.
+    """
+    # Find the two dominant colors in the source
+    cols = dominant_colors(src_pixels, n=2, alpha_min=alpha_min)
+    if len(cols) < 2:
+        return recolor(src_pixels, target_rgb, alpha_min)  # fallback
+
+    color1, color2 = cols[0], cols[1]
+    tr, tg, tb = (target_rgb >> 16) & 0xFF, (target_rgb >> 8) & 0xFF, target_rgb & 0xFF
+    vr, vg, vb = (vanilla_dye_rgb >> 16) & 0xFF, (vanilla_dye_rgb >> 8) & 0xFF, vanilla_dye_rgb & 0xFF
+
+    out = bytearray(src_pixels)
+    for i in range(0, len(src_pixels), 4):
+        if src_pixels[i + 3] < alpha_min:
+            continue
+        r, g, b = src_pixels[i], src_pixels[i + 1], src_pixels[i + 2]
+        if (r, g, b) == color1:
+            out[i], out[i + 1], out[i + 2] = tr, tg, tb
+        elif (r, g, b) == color2:
+            out[i], out[i + 1], out[i + 2] = vr, vg, vb
+        # Other colors (minor accents) left untouched
+    return bytes(out)
+
+
 def generate(kind, source_entry, folder, prefix, suffix="", only=None, alpha_min=128):
     """Recolor one vanilla texture into all 16 colors and save the results.
 
@@ -336,4 +380,24 @@ if __name__ == "__main__":
         generate("bundle", SOURCE_BUNDLE, "item", "", "_bundle", color)
         generate("bundle_back", SOURCE_BUNDLE_OPEN_BACK, "item", "", "_bundle_open_back", color)
         generate("bundle_front", SOURCE_BUNDLE_OPEN_FRONT, "item", "", "_bundle_open_front", color)
+        sys.exit(0)
+    if what in ("all", "glazed"):
+        os.makedirs(os.path.join(RES, "block"), exist_ok=True)
+        for cid, _name_es, _name_en, rgb, vanilla in COLORS:
+            if color and cid != color:
+                continue
+            vanilla_rgb = {
+                "white": 0xFFFFFF, "orange": 0xF9801D, "magenta": 0xC74EBD, "light_blue": 0x3AB3DA,
+                "yellow": 0xFFEC9D, "lime": 0x80C71F, "pink": 0xF4B5CB, "gray": 0x36393D,
+                "light_gray": 0xCCD0D2, "cyan": 0x157788, "purple": 0x8932B8, "blue": 0x2C2E8F,
+                "brown": 0x835432, "green": 0x495B24, "red": 0xB02E26, "black": 0x1D1D21,
+            }[vanilla]
+            src = SOURCE_GLAZED_TERRACOTTA.format(color=vanilla)
+            data = find_in_cache(src)
+            tmp = os.path.join(os.environ.get("TEMP", "."), "_sb_glazed.png")
+            open(tmp, "wb").write(data)
+            w, h, srcpix = read_png(tmp)
+            dest = os.path.join(RES, "block", f"{cid}_glazed_terracotta.png")
+            write_png(dest, w, h, recolor_glazed(srcpix, rgb, vanilla_rgb))
+            print(f"   {os.path.relpath(dest, ROOT)}  #{rgb:06X} (swap {vanilla})")
         sys.exit(0)
