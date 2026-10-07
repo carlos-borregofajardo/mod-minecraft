@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "sniffer_blooms:block/bark_brown_torchflower"
+  }
+}

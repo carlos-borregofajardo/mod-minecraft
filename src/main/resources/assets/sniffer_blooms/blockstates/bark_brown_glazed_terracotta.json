@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "sniffer_blooms:block/bark_brown_glazed_terracotta",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "sniffer_blooms:block/bark_brown_glazed_terracotta"
+    },
+    "facing=east": {
+      "model": "sniffer_blooms:block/bark_brown_glazed_terracotta",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "sniffer_blooms:block/bark_brown_glazed_terracotta",
+      "y": 270
+    }
+  }
+}

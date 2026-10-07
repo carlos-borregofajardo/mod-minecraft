@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "wool",
+  "ingredients": [
+    "sniffer_blooms:bark_brown_dye",
+    "minecraft:white_wool"
+  ],
+  "result": {
+    "id": "sniffer_blooms:bark_brown_wool"
+  }
+}

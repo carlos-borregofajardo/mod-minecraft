@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_components",
+              "include": [
+                "minecraft:custom_name",
+                "minecraft:container",
+                "minecraft:lock",
+                "minecraft:container_loot"
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "sniffer_blooms:bark_brown_shulker_box"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "sniffer_blooms:blocks/bark_brown_shulker_box"
+}
