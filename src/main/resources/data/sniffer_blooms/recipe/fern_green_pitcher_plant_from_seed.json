@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "X": "sniffer_blooms:fern_green_pitcher_seeds"
+  },
+  "pattern": [
+    "X"
+  ],
+  "result": {
+    "id": "sniffer_blooms:fern_green_pitcher_plant"
+  }
+}

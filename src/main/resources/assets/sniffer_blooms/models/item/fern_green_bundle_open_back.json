@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "sniffer_blooms:item/fern_green_bundle_open_back"
+  }
+}

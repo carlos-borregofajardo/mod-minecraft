@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "carpet_dye",
+  "ingredients": [
+    "sniffer_blooms:fern_green_dye",
+    "minecraft:white_carpet"
+  ],
+  "result": {
+    "id": "sniffer_blooms:fern_green_carpet"
+  }
+}

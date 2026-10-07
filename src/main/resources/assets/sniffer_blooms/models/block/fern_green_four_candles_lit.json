@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_four_candles",
+  "textures": {
+    "all": "sniffer_blooms:block/fern_green_candle_lit",
+    "particle": "sniffer_blooms:block/fern_green_candle_lit"
+  }
+}

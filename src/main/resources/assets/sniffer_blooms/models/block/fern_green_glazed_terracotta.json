@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_glazed_terracotta",
+  "textures": {
+    "pattern": "sniffer_blooms:block/fern_green_glazed_terracotta"
+  }
+}
