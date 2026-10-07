@@ -10,7 +10,7 @@ license="All Rights Reserved"
 
 [[mods]]
 modId="sniffer_blooms"
-version="1.0.0"
+version="0.1.0"
 displayName="Sniffer Blooms"
 #updateJSONURL="https://example.com/updates.json" #optional
 #displayURL="https://example.com/" #optional
