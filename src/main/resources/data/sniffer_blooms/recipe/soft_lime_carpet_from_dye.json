@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "carpet_dye",
+  "ingredients": [
+    "sniffer_blooms:soft_lime_dye",
+    "minecraft:white_carpet"
+  ],
+  "result": {
+    "id": "sniffer_blooms:soft_lime_carpet"
+  }
+}

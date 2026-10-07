@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "sniffer_blooms:item/soft_lime_pitcher_seeds"
+  }
+}
