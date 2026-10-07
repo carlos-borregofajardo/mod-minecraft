@@ -17,14 +17,19 @@ the source texture, then reproduces that same ratio using the destination color.
     python tools/gen_textures.py candle          # only the unlit candle wax
     python tools/gen_textures.py candle_lit      # only the lit candle wax
     python tools/gen_textures.py candle_item     # only the candle item icon
+    python tools/gen_textures.py harness         # only the harness kerchief
     python tools/gen_textures.py glass soft_terracotta   # one single color
     python tools/gen_textures.py bed soft_terracotta     # only the bed blanket
+    python tools/gen_textures.py glazed       # only the glazed terracotta tiles
+    python tools/gen_textures.py glazed soft_terracotta   # only one tile
+    python tools/gen_textures.py flowers      # only the fossil flowers (petals)
 
 The source textures are read straight out of the ForgeGradle cache jar, so there
 is no need to extract them by hand.
 """
 
 import glob
+import json
 import os
 import sys
 import zipfile
@@ -44,7 +49,7 @@ from png import read_png, write_png  # noqa: E402
 #                    (signs, sheep, banners, pet collars). See AGENTS.md section 6.
 #
 # NOTE: the biome each color comes from is deliberately NOT here. That belongs to
-# the plant drop tables, which do not exist yet.
+# the sniffer digging loot table (data/minecraft/loot_table/gameplay/sniffer_digging.json).
 COLORS = [
     ("soft_terracotta", "Tinte Terracota Suave", "Soft Terracotta Dye", 0xD98A62, "orange"),
     ("fossil_turquoise", "Tinte Turquesa Fosil", "Fossil Turquoise Dye", 0x62B7AE, "cyan"),
@@ -78,6 +83,7 @@ SOURCE_CANDLE = "assets/minecraft/textures/block/orange_candle.png"
 SOURCE_CANDLE_LIT = "assets/minecraft/textures/block/orange_candle_lit.png"
 SOURCE_CANDLE_ITEM = "assets/minecraft/textures/item/orange_candle.png"
 SOURCE_SHULKER = "assets/minecraft/textures/entity/shulker/shulker_white.png"
+SOURCE_SHULKER_BLOCK = "assets/minecraft/textures/block/orange_shulker_box.png"
 SOURCE_BED_FOOT_EAST = "assets/minecraft/textures/block/red_bed_foot_east.png"
 SOURCE_BED_FOOT_SOUTH = "assets/minecraft/textures/block/red_bed_foot_south.png"
 SOURCE_BED_FOOT_UP = "assets/minecraft/textures/block/red_bed_foot_up.png"
@@ -91,6 +97,67 @@ SOURCE_BUNDLE_OPEN_BACK = "assets/minecraft/textures/item/orange_bundle_open_bac
 SOURCE_BUNDLE_OPEN_FRONT = "assets/minecraft/textures/item/orange_bundle_open_front.png"
 SOURCE_GLAZED_TERRACOTTA = "assets/minecraft/textures/block/{color}_glazed_terracotta.png"
 
+# --- Flowers: the fossil torchflower / pitcher plant varieties ----------------
+# The two prehistoric Sniffer plants. We recolor only the FLOWER part, never the
+# stem/leaves:
+#   torchflower -> the vanilla `torchflower.png` sprite holds petals, the yellow
+#                  heart, the stem and the leaves in one drawing. Only the petal
+#                  colors are repainted; heart (yellow) and greens stay vanilla.
+#   pitcher      -> its flower part is the whole mature top sprite
+#                  (pitcher_crop_top_stage_4); the bottom/stem stays vanilla.
+SOURCE_FLOWER_TORCHFLOWER = "assets/minecraft/textures/block/torchflower.png"
+SOURCE_FLOWER_PITCHER = "assets/minecraft/textures/block/pitcher_crop_top_stage_4.png"
+SOURCE_TORCHFLOWER_SEEDS = "assets/minecraft/textures/item/torchflower_seeds.png"
+SOURCE_PITCHER_POD = "assets/minecraft/textures/item/pitcher_pod.png"
+
+# The vanilla torchflower petals: purple + warm red accents. The yellow heart
+# (FCE257/F6B927/DE8B25) and every green/shadow pixel are deliberately NOT here.
+TORCHFLOWER_FLOWER_COLORS = {
+    (0x65, 0x2D, 0x70),
+    (0xE8, 0x72, 0x72),
+    (0xD0, 0x31, 0x14),
+    (0xA1, 0x26, 0x10),
+}
+
+# Which fossil colors become which flower. Warm hues -> torchflower, cool -> pitcher.
+TORCHFLOWER_FLOWERS = {"soft_terracotta", "ancient_rose", "pollen_yellow", "clay_red",
+                       "bark_brown", "fossil_ivory", "coral", "ash_gray"}
+PITCHER_FLOWERS = {"fossil_turquoise", "fern_green", "lavender", "mist_blue",
+                   "stone_gray", "fossil_blue", "soft_lime", "obsidian"}
+
+
+def recolor_flower_part(src_pixels, target_rgb, part_colors, alpha_min=128):
+    """Repaint only the pixels whose RGB is in `part_colors` (the flower part).
+
+    The whole plant keeps its drawing; the flower part gets the target hue and
+    saturation and every petal pixel keeps its own brightness, scaled so the
+    brightest petal pixel equals the target color (no white speculars from
+    clamping). Everything outside `part_colors` (yellow heart, stem, leaves,
+    shadow pixels) stays byte-for-byte vanilla.
+    """
+    tr = (target_rgb >> 16) & 0xFF
+    tg = (target_rgb >> 8) & 0xFF
+    tb = target_rgb & 0xFF
+    th, ts, tv = rgb_to_hsv(tr, tg, tb)
+    ref = max(
+        rgb_to_hsv(src_pixels[i], src_pixels[i + 1], src_pixels[i + 2])[2]
+        for i in range(0, len(src_pixels), 4)
+        if src_pixels[i + 3] >= alpha_min
+        and (src_pixels[i], src_pixels[i + 1], src_pixels[i + 2]) in part_colors
+    ) or 1.0
+    vs = tv / ref
+
+    out = bytearray(src_pixels)
+    for i in range(0, len(src_pixels), 4):
+        if out[i + 3] < alpha_min:
+            continue  # keep transparency as it is
+        if (out[i], out[i + 1], out[i + 2]) not in part_colors:
+            continue  # heart, stem and leaves stay untouched
+        _h, _s, v = rgb_to_hsv(out[i], out[i + 1], out[i + 2])
+        nr, ng, nb = hsv_to_rgb(th, ts, min(1.0, v * vs))
+        out[i], out[i + 1], out[i + 2] = nr, ng, nb
+    return bytes(out)
+
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(ROOT, "src", "main", "resources", "assets", "sniffer_blooms", "textures")
@@ -103,15 +170,36 @@ def find_in_cache(entry):
     Minecraft's own assets live in a jar, not loose on disk. Rather than telling
     the user to unzip it by hand, walk the cache and return the first match.
     """
+    if entry in _CACHE_BYTES:
+        return _CACHE_BYTES[entry]
     for jar in glob.glob(os.path.join(CACHE, "**", "*.jar"), recursive=True):
         try:
             with zipfile.ZipFile(jar) as z:
                 if entry in z.namelist():
-                    return z.read(entry)
+                    _CACHE_BYTES[entry] = z.read(entry)
+                    return _CACHE_BYTES[entry]
         except Exception:
             # A jar that cannot be opened is not our file, keep looking.
             continue
     raise FileNotFoundError(f"no se encontro {entry} en la cache de ForgeGradle")
+
+
+_CACHE_BYTES = {}
+_PNG_CACHE = {}
+
+
+def vanilla_png(entry):
+    """Read a vanilla texture from the cache and cache the decoded pixels too.
+
+    The harness mask needs all 16 harness sprites, and walking the whole
+    ForgeGradle cache once per sprite would be needlessly slow.
+    """
+    if entry not in _PNG_CACHE:
+        data = find_in_cache(entry)
+        tmp = os.path.join(os.environ.get("TEMP", "."), "_sb_src.png")
+        open(tmp, "wb").write(data)  # read_png works on a path, so drop it on disk first
+        _PNG_CACHE[entry] = read_png(tmp)
+    return _PNG_CACHE[entry]
 
 
 def luminance(r, g, b):
@@ -251,6 +339,238 @@ def recolor_bed(src_pixels, target_rgb, alpha_min=128):
     return bytes(out)
 
 
+# --- Harness: kerchief-only recolor -----------------------------------------
+# Vanilla harnesses share the leather straps and the buckles; only the coloured
+# kerchief differs between dye colours (34 of the 256 pixels, in three shade
+# levels of 19/6/9 pixels). Repainting the whole sprite (as the generic
+# `recolor` does) also tints the leather, which is why our old 16 sprites all
+# looked fully recolored. The kerchief mask is computed from the vanilla
+# sprites themselves: positions where the 16 dyes disagree and at least one of
+# them is saturated (grey/shaded leather pixels vary only in white's highlight
+# and stay outside the mask).
+HARNESS_VANILLA_DYES = [
+    "white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
+    "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black",
+]
+HARNESS_SAT_MIN = 0.12
+_HARNESS_MASK = None
+
+
+def harness_fabric_mask():
+    """Pixel indices covered by the coloured kerchief of a harness (0-255)."""
+    global _HARNESS_MASK
+    if _HARNESS_MASK is None:
+        sprites = [vanilla_png(f"assets/minecraft/textures/item/{n}_harness.png")[2]
+                   for n in HARNESS_VANILLA_DYES]
+        mask = []
+        for p in range(len(sprites[0]) // 4):
+            rgba = {s[p * 4:p * 4 + 4] for s in sprites}
+            if len(rgba) == 1:
+                continue
+            if any(rgb_to_hsv(*s[p * 4:p * 4 + 3])[1] > HARNESS_SAT_MIN for s in sprites):
+                mask.append(p)
+        _HARNESS_MASK = mask
+    return _HARNESS_MASK
+
+
+def recolor_harness(src_pixels, target_rgb, alpha_min=128):
+    """Repaint only the kerchief of a harness in the target dye color.
+
+    Leather, buckles and shading stay byte-for-byte identical to vanilla; the
+    hue and saturation come from the dye, and each kerchief pixel keeps its own
+    brightness (scaled so the brightest kerchief pixel equals the dye color).
+    """
+    tr = (target_rgb >> 16) & 0xFF
+    tg = (target_rgb >> 8) & 0xFF
+    tb = target_rgb & 0xFF
+    th, ts, tv = rgb_to_hsv(tr, tg, tb)
+    ref = max(rgb_to_hsv(*src_pixels[p * 4:p * 4 + 3])[2] for p in harness_fabric_mask()) or 1.0
+    vs = tv / ref
+
+    out = bytearray(src_pixels)
+    for p in harness_fabric_mask():
+        i = p * 4
+        if out[i + 3] < alpha_min:
+            continue  # keep transparency as it is
+        _h, _s, v = rgb_to_hsv(out[i], out[i + 1], out[i + 2])
+        nr, ng, nb = hsv_to_rgb(th, ts, min(1.0, v * vs))
+        out[i], out[i + 1], out[i + 2] = nr, ng, nb
+    return bytes(out)
+
+
+# --- Bundles: pouch-only recolor (keep the vanilla cord) ---------------------
+# The generic recolor tinted the whole sprite, rope included, so our bundles had
+# a colored cord that reads badly against the pouch. Vanilla keeps the drawstring
+# the same brown on all 16 dyed bundles (the only pixels whose RGBA is identical
+# across every color), so we only repaint the pouch: positions where the 16
+# vanilla bundles disagree. Each variant (closed / open_back / open_front) has
+# its own cord mask, computed from the vanilla sprites themselves.
+_BUNDLE_CORD = {}
+
+
+def bundle_cord_mask(suffix):
+    """Pixel indices shared by every vanilla bundle (the rope) for one variant."""
+    if suffix not in _BUNDLE_CORD:
+        sprites = [vanilla_png(f"assets/minecraft/textures/item/{n}_bundle{suffix}.png")[2]
+                   for n in HARNESS_VANILLA_DYES]
+        n = len(sprites[0]) // 4
+        _BUNDLE_CORD[suffix] = {p for p in range(n) if len({s[p * 4:p * 4 + 4] for s in sprites}) == 1}
+    return _BUNDLE_CORD[suffix]
+
+
+def recolor_bundle(src_pixels, target_rgb, suffix="", alpha_min=128):
+    """Repaint only the pouch of a bundle in the target color.
+
+    The rope (and every other pixel vanilla shares across colors) stays
+    byte-for-byte identical; the pouch keeps its own shading, scaled so the
+    brightest pouch pixel equals the target color.
+    """
+    tr = (target_rgb >> 16) & 0xFF
+    tg = (target_rgb >> 8) & 0xFF
+    tb = target_rgb & 0xFF
+    th, ts, tv = rgb_to_hsv(tr, tg, tb)
+    cord = bundle_cord_mask(suffix)
+    pouch = (p for p in range(len(src_pixels) // 4)
+             if p not in cord and src_pixels[p * 4 + 3] >= alpha_min)
+    ref = max(rgb_to_hsv(*src_pixels[p * 4:p * 4 + 3])[2] for p in pouch) or 1.0
+    vs = tv / ref
+
+    out = bytearray(src_pixels)
+    for p in range(len(src_pixels) // 4):
+        i = p * 4
+        if out[i + 3] < alpha_min or p in cord:
+            continue  # keep transparency and the rope as they are
+        _h, _s, v = rgb_to_hsv(out[i], out[i + 1], out[i + 2])
+        nr, ng, nb = hsv_to_rgb(th, ts, min(1.0, v * vs))
+        out[i], out[i + 1], out[i + 2] = nr, ng, nb
+    return bytes(out)
+
+
+# Recoloring each vanilla tile into a fossil color (the old recolor_glazed plus
+# the orange/teal swap) was mangling the pattern, so glazed tiles moved to a
+# different trick: the tile keeps a vanilla drawing but painted with the palette
+# of a different vanilla tile. Each mod color has a "vanilla family" (the
+# `vanilla` field of COLORS), so to make the dye and the tile of the same name
+# match, every tile is named after its own palette: the file cid_i is painted
+# with the palette of its own family and borrows the DRAWING of the mirror
+# partner 15-i (soft_terracotta <-> obsidian, fossil_turquoise <-> coral, ...).
+# The 16 paintings are exactly the mirror set, only their names are reordered.
+#
+# The "main colors" of a tile are its K most frequent colors (16x16-quantized
+# buckets). The drawing's buckets and the palette buckets are aligned by
+# luminance (dark <-> dark, light <-> light); every pixel is recolored to the
+# target color scaled by its own brightness relative to the drawing bucket it
+# belongs to, so the drawing's shading is preserved exactly.
+GLAZED_K = 4
+GLAZED_BUCKET = 16
+GLAZED_MIN_COUNT = 6
+
+
+def glazed_buckets(pixels, alpha_min=128):
+    """Top-k color buckets of a glazed tile as (r, g, b, luminance)."""
+    counts = {}
+    members = {}
+    for i in range(0, len(pixels), 4):
+        if pixels[i + 3] < alpha_min:
+            continue
+        key = (pixels[i] // GLAZED_BUCKET * GLAZED_BUCKET,
+               pixels[i + 1] // GLAZED_BUCKET * GLAZED_BUCKET,
+               pixels[i + 2] // GLAZED_BUCKET * GLAZED_BUCKET)
+        counts[key] = counts.get(key, 0) + 1
+        members.setdefault(key, []).append((pixels[i], pixels[i + 1], pixels[i + 2]))
+    out = []
+    for key, count in sorted(counts.items(), key=lambda kv: -kv[1]):
+        if count < GLAZED_MIN_COUNT:
+            continue
+        ms = members[key]
+        n = len(ms)
+        bucket = tuple(sum(x[c] for x in ms) // n for c in range(3))
+        lum = (bucket[0] * 299 + bucket[1] * 587 + bucket[2] * 114) // 1000
+        out.append(bucket + (lum,))
+        if len(out) >= GLAZED_K:
+            break
+    return out
+
+
+def palette_transfer(draw_pixels, pal_pixels, alpha_min=128):
+    """Repaint `draw_pixels` keeping its drawing, using the palette of `pal_pixels`.
+
+    The drawing buckets and the palette buckets are matched by luminance rank;
+    every pixel takes the partner's color scaled by how bright it is compared
+    to its own drawing bucket, so the raster stays identical in shape.
+    """
+    draw = glazed_buckets(draw_pixels)
+    pal = glazed_buckets(pal_pixels)
+    m = min(len(draw), len(pal))
+    draw = sorted(draw[:m], key=lambda c: c[3])
+    pal = sorted(pal[:m], key=lambda c: c[3])
+
+    out = bytearray(draw_pixels)
+    for i in range(0, len(draw_pixels), 4):
+        if draw_pixels[i + 3] < alpha_min:
+            continue  # keep the antialiased fringe as it is
+        r, g, b = draw_pixels[i], draw_pixels[i + 1], draw_pixels[i + 2]
+        best = min(range(m), key=lambda j: (r - draw[j][0]) ** 2 + (g - draw[j][1]) ** 2 + (b - draw[j][2]) ** 2)
+        base_lum = draw[best][3] or 1.0
+        pr, pg, pb, _pl = pal[best]
+        scale = (r * 299 + g * 587 + b * 114) / 1000.0 / base_lum
+        out[i] = max(0, min(255, round(pr * scale)))
+        out[i + 1] = max(0, min(255, round(pg * scale)))
+        out[i + 2] = max(0, min(255, round(pb * scale)))
+    return bytes(out)
+
+
+# --- Dyes: blob-only recolor, one vanilla drawing per color ------------------
+# Vanilla dye items are not one shape recolored 16 times: each of the 16 dyes is
+# its own drawing (blob + hand-drawn shading) plus a set of outline/shadow
+# pixels whose RGBA is byte-identical across all 16 dyes (26 pixels, the "rest
+# of the object"). Our 16 dyes used to be white_dye recolored 16 times, so they
+# all shared the same drawing. Now each color copies the vanilla dye it maps to
+# (the `vanilla` field of COLORS) and repaints only its blob: target hue and
+# saturation for every blob pixel, keeping each pixel's own brightness scaled so
+# the brightest blob pixel equals the target color. The shared outline/shadow
+# pixels stay byte-for-byte as vanilla.
+_DYE_OUTLINE = None
+
+
+def dye_outline_mask():
+    """Pixel indices whose RGBA is identical across the 16 vanilla dyes."""
+    global _DYE_OUTLINE
+    if _DYE_OUTLINE is None:
+        sprites = [vanilla_png(f"assets/minecraft/textures/item/{n}_dye.png")[2]
+                   for n in HARNESS_VANILLA_DYES]
+        n = len(sprites[0]) // 4
+        _DYE_OUTLINE = {p for p in range(n) if len({s[p * 4:p * 4 + 4] for s in sprites}) == 1}
+    return _DYE_OUTLINE
+
+
+def recolor_dye(src_pixels, target_rgb, alpha_min=128):
+    """Repaint the dye blob in the target color, keeping the vanilla drawing.
+
+    The blob pixels get the target hue/saturation; the shared outline/shadow
+    pixels (and the antialiased fringe) are copied untouched.
+    """
+    tr = (target_rgb >> 16) & 0xFF
+    tg = (target_rgb >> 8) & 0xFF
+    tb = target_rgb & 0xFF
+    th, ts, tv = rgb_to_hsv(tr, tg, tb)
+    outline = dye_outline_mask()
+    opaque = (p for p in range(len(src_pixels) // 4)
+              if p not in outline and src_pixels[p * 4 + 3] >= alpha_min)
+    ref = max(rgb_to_hsv(*src_pixels[p * 4:p * 4 + 3])[2] for p in opaque) or 1.0
+    vs = tv / ref
+
+    out = bytearray(src_pixels)
+    for p in range(len(src_pixels) // 4):
+        i = p * 4
+        if out[i + 3] < alpha_min or p in outline:
+            continue  # keep transparency and the shared outline as they are
+        _h, _s, v = rgb_to_hsv(out[i], out[i + 1], out[i + 2])
+        nr, ng, nb = hsv_to_rgb(th, ts, min(1.0, v * vs))
+        out[i], out[i + 1], out[i + 2] = nr, ng, nb
+    return bytes(out)
+
+
 def dominant_colors(pixels, n=2, alpha_min=128):
     """Return the top-n most frequent opaque colors in the texture."""
     counts = {}
@@ -294,7 +614,62 @@ def recolor_glazed(src_pixels, target_rgb, vanilla_dye_rgb, alpha_min=128):
     return bytes(out)
 
 
-def generate(kind, source_entry, folder, prefix, suffix="", only=None, alpha_min=128):
+# --- Glazed terracotta: orange / teal swap --------------------------------
+# The vanilla orange glazed pattern carries teal accents (small cubes in the
+# swirl) that recolor_glazed leaves untouched, so the soft_terracotta glazed
+# tile ends up painted in both orange and blue. Swap those two families for any
+# tile that actually contains both colors: where it is orange put teal, where it
+# is teal put orange. Shading (S and V) is preserved; grey/white pixels stay.
+#
+# The orange family needs a minimum brightness on top of its hue: brown and dark
+# red share the orange hue band, and yellow sits just above it, so without the
+# V/S limits tiles like bark_brown or fossil_ivory would be swapped too. Real
+# orange is bright (V >= 0.75) and saturated, which is what we actually mean.
+GLAZED_SWAP_SAT_MIN = 0.45       # ignore near-grey pixels (white highlights)
+GLAZED_SWAP_VAL_MIN = 0.75       # only bright colors count as orange (no browns)
+GLAZED_ORANGE_HUE_MAX = 40.0     # the orange family, [0, 40); yellow is 45+
+GLAZED_TEAL_HUE_MIN = 150.0      # the teal/blue family
+GLAZED_TEAL_HUE_MAX = 215.0
+GLAZED_SWAP_MIN_PIXELS = 12      # both families must be present enough
+GLAZED_ORANGE_HUE = 30.0         # hue used where the teal pixels were
+GLAZED_TEAL_HUE = 185.0          # hue used where the orange pixels were
+
+
+def swap_orange_and_blue(pixels, alpha_min=128):
+    """Swap the orange and teal families of a glazed tile, if both are present."""
+    n_orange = n_teal = 0
+    for i in range(0, len(pixels), 4):
+        if pixels[i + 3] < alpha_min:
+            continue
+        h, s, v = rgb_to_hsv(pixels[i], pixels[i + 1], pixels[i + 2])
+        if s < GLAZED_SWAP_SAT_MIN:
+            continue
+        if h < GLAZED_ORANGE_HUE_MAX and v >= GLAZED_SWAP_VAL_MIN:
+            n_orange += 1
+        elif GLAZED_TEAL_HUE_MIN <= h <= GLAZED_TEAL_HUE_MAX:
+            n_teal += 1
+    if n_orange < GLAZED_SWAP_MIN_PIXELS or n_teal < GLAZED_SWAP_MIN_PIXELS:
+        return pixels  # this tile is not orange + blue, leave it alone
+
+    out = bytearray(pixels)
+    for i in range(0, len(pixels), 4):
+        if pixels[i + 3] < alpha_min:
+            continue
+        r, g, b = pixels[i], pixels[i + 1], pixels[i + 2]
+        h, s, v = rgb_to_hsv(r, g, b)
+        if s < GLAZED_SWAP_SAT_MIN:
+            continue
+        if h < GLAZED_ORANGE_HUE_MAX and v >= GLAZED_SWAP_VAL_MIN:
+            nr, ng, nb = hsv_to_rgb(GLAZED_TEAL_HUE, s, v)
+        elif GLAZED_TEAL_HUE_MIN <= h <= GLAZED_TEAL_HUE_MAX:
+            nr, ng, nb = hsv_to_rgb(GLAZED_ORANGE_HUE, s, v)
+        else:
+            continue
+        out[i], out[i + 1], out[i + 2] = nr, ng, nb
+    return bytes(out)
+
+
+def generate(kind, source_entry, folder, prefix, suffix="", only=None, alpha_min=128, recolor_fn=recolor):
     """Recolor one vanilla texture into all 16 colors and save the results.
 
     kind          -> label printed in the console, e.g. "dyes"
@@ -304,21 +679,20 @@ def generate(kind, source_entry, folder, prefix, suffix="", only=None, alpha_min
     only          -> color id to generate, None for all 16
     alpha_min     -> lowest alpha value that still gets recolored. Glass is mostly
                      semi transparent, so it needs 1 instead of the usual 128.
+    recolor_fn    -> pixels colormap to apply (generic `recolor` by default,
+                     kerchief-only `recolor_harness` for harnesses).
     """
-    data = find_in_cache(source_entry)
-    tmp = os.path.join(os.environ.get("TEMP", "."), "_sb_src.png")
-    open(tmp, "wb").write(data)  # read_png works on a path, so drop it on disk first
-    w, h, src = read_png(tmp)
+    _w, _h, src = vanilla_png(source_entry)
 
     outdir = os.path.join(RES, folder)
     os.makedirs(outdir, exist_ok=True)
-    print(f"[{kind}] base {source_entry} ({w}x{h}) -> {outdir}")
+    print(f"[{kind}] base {source_entry} ({_w}x{_h}) -> {outdir}")
 
     for cid, _name_es, _name_en, rgb, _vanilla in COLORS:
         if only and cid != only:
             continue
         dest = os.path.join(outdir, f"{prefix}{cid}{suffix}.png")
-        write_png(dest, w, h, recolor(src, rgb, alpha_min))
+        write_png(dest, _w, _h, recolor_fn(src, rgb, alpha_min))
         print(f"   {os.path.relpath(dest, ROOT)}  #{rgb:06X}")
 
 
@@ -326,7 +700,14 @@ if __name__ == "__main__":
     what = sys.argv[1] if len(sys.argv) > 1 else "all"
     color = sys.argv[2] if len(sys.argv) > 2 else None
     if what in ("all", "dyes"):
-        generate("dyes", SOURCE_DYE, "item", "", "_dye", color)
+        os.makedirs(os.path.join(RES, "item"), exist_ok=True)
+        for cid, _name_es, _name_en, rgb, vanilla in COLORS:
+            if color and cid != color:
+                continue
+            _w, _h, src = vanilla_png(f"assets/minecraft/textures/item/{vanilla}_dye.png")
+            dest = os.path.join(RES, "item", f"{cid}_dye.png")
+            write_png(dest, _w, _h, recolor_dye(src, rgb))
+            print(f"   {os.path.relpath(dest, ROOT)}  #{rgb:06X} (base {vanilla})")
     if what in ("all", "wool"):
         generate("wool", SOURCE_WOOL, "block", "", "_wool", color)
     if what in ("all", "terracotta"):
@@ -348,6 +729,8 @@ if __name__ == "__main__":
     if what in ("all", "shulker"):
         os.makedirs(os.path.join(RES, "entity", "shulker"), exist_ok=True)
         generate("shulker", SOURCE_SHULKER, "entity/shulker", "shulker_", "", color)
+        os.makedirs(os.path.join(RES, "block"), exist_ok=True)
+        generate("shulker_box_tex", SOURCE_SHULKER_BLOCK, "block", "", "_shulker_box", color)
     if what in ("all", "bed"):
         bed_dir = os.path.join(RES, "block")
         os.makedirs(bed_dir, exist_ok=True)
@@ -370,34 +753,58 @@ if __name__ == "__main__":
                 dest = os.path.join(bed_dir, f"{cid}_{name}.png")
                 write_png(dest, w, h, recolor_bed(srcpix, rgb))
                 print(f"   {os.path.relpath(dest, ROOT)}  #{rgb:06X}")
-        sys.exit(0)
     if what in ("all", "harness"):
         os.makedirs(os.path.join(RES, "item"), exist_ok=True)
-        generate("harness", SOURCE_HARNESS, "item", "", "_harness", color)
-        sys.exit(0)
+        generate("harness", SOURCE_HARNESS, "item", "", "_harness", color, recolor_fn=recolor_harness)
     if what in ("all", "bundle"):
-        os.makedirs(os.path.join(RES, "item"), exist_ok=True)
-        generate("bundle", SOURCE_BUNDLE, "item", "", "_bundle", color)
-        generate("bundle_back", SOURCE_BUNDLE_OPEN_BACK, "item", "", "_bundle_open_back", color)
-        generate("bundle_front", SOURCE_BUNDLE_OPEN_FRONT, "item", "", "_bundle_open_front", color)
-        sys.exit(0)
+        item_dir = os.path.join(RES, "item")
+        os.makedirs(item_dir, exist_ok=True)
+        for src, suf in ((SOURCE_BUNDLE, ""),
+                         (SOURCE_BUNDLE_OPEN_BACK, "_open_back"),
+                         (SOURCE_BUNDLE_OPEN_FRONT, "_open_front")):
+            _w, _h, srcpix = vanilla_png(src)
+            for cid, _name_es, _name_en, rgb, _vanilla in COLORS:
+                if color and cid != color:
+                    continue
+                dest = os.path.join(item_dir, f"{cid}_bundle{suf}.png")
+                write_png(dest, _w, _h, recolor_bundle(srcpix, rgb, suffix=suf))
+                print(f"   {os.path.relpath(dest, ROOT)}  #{rgb:06X} (cuerda vanilla)")
     if what in ("all", "glazed"):
         os.makedirs(os.path.join(RES, "block"), exist_ok=True)
-        for cid, _name_es, _name_en, rgb, vanilla in COLORS:
+        for i, (cid, _name_es, _name_en, _rgb, vanilla) in enumerate(COLORS):
             if color and cid != color:
                 continue
-            vanilla_rgb = {
-                "white": 0xFFFFFF, "orange": 0xF9801D, "magenta": 0xC74EBD, "light_blue": 0x3AB3DA,
-                "yellow": 0xFFEC9D, "lime": 0x80C71F, "pink": 0xF4B5CB, "gray": 0x36393D,
-                "light_gray": 0xCCD0D2, "cyan": 0x157788, "purple": 0x8932B8, "blue": 0x2C2E8F,
-                "brown": 0x835432, "green": 0x495B24, "red": 0xB02E26, "black": 0x1D1D21,
-            }[vanilla]
-            src = SOURCE_GLAZED_TERRACOTTA.format(color=vanilla)
-            data = find_in_cache(src)
-            tmp = os.path.join(os.environ.get("TEMP", "."), "_sb_glazed.png")
-            open(tmp, "wb").write(data)
-            w, h, srcpix = read_png(tmp)
+            partner = COLORS[15 - i][4]
+            _w, _h, draw = vanilla_png(SOURCE_GLAZED_TERRACOTTA.format(color=partner))
+            _w2, _h2, pal = vanilla_png(SOURCE_GLAZED_TERRACOTTA.format(color=vanilla))
             dest = os.path.join(RES, "block", f"{cid}_glazed_terracotta.png")
-            write_png(dest, w, h, recolor_glazed(srcpix, rgb, vanilla_rgb))
-            print(f"   {os.path.relpath(dest, ROOT)}  #{rgb:06X} (swap {vanilla})")
-        sys.exit(0)
+            write_png(dest, _w, _h, palette_transfer(draw, pal))
+            print(f"   {os.path.relpath(dest, ROOT)}  (dibujo {partner}, paleta {vanilla})")
+    if what in ("all", "flowers"):
+        os.makedirs(os.path.join(RES, "block"), exist_ok=True)
+        os.makedirs(os.path.join(RES, "item"), exist_ok=True)
+        for cid, _name_es, _name_en, rgb, _vanilla in COLORS:
+            if color and cid != color:
+                continue
+            if cid in TORCHFLOWER_FLOWERS:
+                _w, _h, src = vanilla_png(SOURCE_FLOWER_TORCHFLOWER)
+                dest = os.path.join(RES, "block", f"{cid}_torchflower.png")
+                write_png(dest, _w, _h, recolor_flower_part(src, rgb, TORCHFLOWER_FLOWER_COLORS))
+                print(f"   {os.path.relpath(dest, ROOT)}  #{rgb:06X} (petalos, centro vanilla)")
+                mdata = os.path.join(RES, "block", f"{cid}_torchflower.png.mcmeta")
+                with open(mdata, "w", encoding="utf-8") as f:
+                    json.dump({"texture": {"mipmap_strategy": "strict_cutout"}}, f)
+                print(f"   {os.path.relpath(mdata, ROOT)}")
+                _w, _h, ssrc = vanilla_png(SOURCE_TORCHFLOWER_SEEDS)
+                sdest = os.path.join(RES, "item", f"{cid}_torchflower_seeds.png")
+                write_png(sdest, _w, _h, recolor(ssrc, rgb))
+                print(f"   {os.path.relpath(sdest, ROOT)}  #{rgb:06X} (semillas)")
+            elif cid in PITCHER_FLOWERS:
+                _w, _h, src = vanilla_png(SOURCE_FLOWER_PITCHER)
+                dest = os.path.join(RES, "block", f"{cid}_pitcher_plant.png")
+                write_png(dest, _w, _h, recolor(src, rgb))
+                print(f"   {os.path.relpath(dest, ROOT)}  #{rgb:06X} (flor entera)")
+                _w, _h, ssrc = vanilla_png(SOURCE_PITCHER_POD)
+                sdest = os.path.join(RES, "item", f"{cid}_pitcher_seeds.png")
+                write_png(sdest, _w, _h, recolor(ssrc, rgb))
+                print(f"   {os.path.relpath(sdest, ROOT)}  #{rgb:06X} (semillas)")
