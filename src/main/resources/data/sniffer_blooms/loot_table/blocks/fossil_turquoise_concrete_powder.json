@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:fossil_turquoise_concrete_powder"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "sniffer_blooms:blocks/fossil_turquoise_concrete_powder"
+}

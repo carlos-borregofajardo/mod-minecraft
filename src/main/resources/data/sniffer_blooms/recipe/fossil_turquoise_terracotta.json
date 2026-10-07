@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "stained_terracotta",
+  "key": {
+    "#": "minecraft:terracotta",
+    "X": "sniffer_blooms:fossil_turquoise_dye"
+  },
+  "pattern": [
+    "###",
+    "#X#",
+    "###"
+  ],
+  "result": {
+    "count": 8,
+    "id": "sniffer_blooms:fossil_turquoise_terracotta"
+  }
+}
