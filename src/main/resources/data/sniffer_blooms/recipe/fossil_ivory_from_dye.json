@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "wool",
+  "ingredients": [
+    "sniffer_blooms:fossil_ivory_dye",
+    "minecraft:white_wool"
+  ],
+  "result": {
+    "id": "sniffer_blooms:fossil_ivory_wool"
+  }
+}
