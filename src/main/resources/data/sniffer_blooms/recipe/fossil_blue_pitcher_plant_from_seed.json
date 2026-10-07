@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "X": "sniffer_blooms:fossil_blue_pitcher_seeds"
+  },
+  "pattern": [
+    "X"
+  ],
+  "result": {
+    "id": "sniffer_blooms:fossil_blue_pitcher_plant"
+  }
+}
