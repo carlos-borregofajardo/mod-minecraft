@@ -1,0 +1,227 @@
+{
+  "type": "minecraft:gift",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:torchflower_seeds"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:pitcher_pod"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:soft_terracotta_torchflower_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:badlands"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:ancient_rose_torchflower_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:cherry_grove"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:pollen_yellow_torchflower_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:sunflower_plains"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:clay_red_torchflower_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:eroded_badlands"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:bark_brown_torchflower_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:dark_forest"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:fossil_ivory_torchflower_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:snowy_plains"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:coral_torchflower_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:flower_forest"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:ash_gray_torchflower_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:windswept_forest"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:fossil_turquoise_pitcher_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:mangrove_swamp"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:fern_green_pitcher_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:jungle"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:lavender_pitcher_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:meadow"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:mist_blue_pitcher_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:taiga"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:stone_gray_pitcher_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:stony_peaks"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:fossil_blue_pitcher_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:snowy_taiga"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:soft_lime_pitcher_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:swamp"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "sniffer_blooms:obsidian_pitcher_seeds",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:savanna"
+              }
+            }
+          ]
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "minecraft:gameplay/sniffer_digging"
+}
