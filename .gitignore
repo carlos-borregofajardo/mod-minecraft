@@ -20,6 +20,8 @@ build
 # other
 eclipse
 run
+run-client.err
+run-client.log
 
 # Files from Forge MDK
 forge_README.txt
