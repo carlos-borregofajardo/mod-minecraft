@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/carpet",
+  "textures": {
+    "wool": "sniffer_blooms:block/pollen_yellow_wool"
+  }
+}
