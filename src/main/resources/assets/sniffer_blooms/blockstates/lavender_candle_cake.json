@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "sniffer_blooms:block/lavender_candle_cake"
+    },
+    "lit=true": {
+      "model": "sniffer_blooms:block/lavender_candle_cake_lit"
+    }
+  }
+}

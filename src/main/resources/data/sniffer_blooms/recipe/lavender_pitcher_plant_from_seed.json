@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "X": "sniffer_blooms:lavender_pitcher_seeds"
+  },
+  "pattern": [
+    "X"
+  ],
+  "result": {
+    "id": "sniffer_blooms:lavender_pitcher_plant"
+  }
+}
