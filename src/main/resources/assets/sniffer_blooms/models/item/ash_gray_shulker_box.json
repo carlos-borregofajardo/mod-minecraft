@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/template_shulker_box",
+  "textures": {
+    "particle": "sniffer_blooms:block/ash_gray_shulker_box"
+  }
+}

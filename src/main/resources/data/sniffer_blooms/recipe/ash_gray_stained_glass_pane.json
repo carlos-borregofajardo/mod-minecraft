@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "stained_glass_pane",
+  "key": {
+    "#": "sniffer_blooms:ash_gray_stained_glass"
+  },
+  "pattern": [
+    "###",
+    "###"
+  ],
+  "result": {
+    "count": 16,
+    "id": "sniffer_blooms:ash_gray_stained_glass_pane"
+  }
+}

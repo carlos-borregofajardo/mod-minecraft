@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "sniffer_blooms:item/ash_gray_bundle_open_front"
+  }
+}
