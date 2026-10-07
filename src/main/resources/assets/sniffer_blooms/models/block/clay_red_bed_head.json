@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/template_bed_head",
+  "textures": {
+    "east": "sniffer_blooms:block/clay_red_bed_head_east",
+    "up": "sniffer_blooms:block/clay_red_bed_head_up",
+    "west": "sniffer_blooms:block/clay_red_bed_head_west"
+  }
+}
