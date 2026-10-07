@@ -1,5 +1,20 @@
 {
   "values": [
-    "sniffer_blooms:soft_terracotta_dye"
+    "sniffer_blooms:soft_terracotta_dye",
+    "sniffer_blooms:fossil_turquoise_dye",
+    "sniffer_blooms:ancient_rose_dye",
+    "sniffer_blooms:fern_green_dye",
+    "sniffer_blooms:pollen_yellow_dye",
+    "sniffer_blooms:lavender_dye",
+    "sniffer_blooms:mist_blue_dye",
+    "sniffer_blooms:stone_gray_dye",
+    "sniffer_blooms:ash_gray_dye",
+    "sniffer_blooms:clay_red_dye",
+    "sniffer_blooms:bark_brown_dye",
+    "sniffer_blooms:fossil_blue_dye",
+    "sniffer_blooms:fossil_ivory_dye",
+    "sniffer_blooms:soft_lime_dye",
+    "sniffer_blooms:coral_dye",
+    "sniffer_blooms:obsidian_dye"
   ]
 }

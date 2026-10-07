@@ -17,6 +17,21 @@
     "minecraft:green_candle",
     "minecraft:red_candle",
     "minecraft:black_candle",
-    "sniffer_blooms:soft_terracotta_candle"
+    "sniffer_blooms:soft_terracotta_candle",
+    "sniffer_blooms:fossil_turquoise_candle",
+    "sniffer_blooms:ancient_rose_candle",
+    "sniffer_blooms:fern_green_candle",
+    "sniffer_blooms:pollen_yellow_candle",
+    "sniffer_blooms:lavender_candle",
+    "sniffer_blooms:mist_blue_candle",
+    "sniffer_blooms:stone_gray_candle",
+    "sniffer_blooms:ash_gray_candle",
+    "sniffer_blooms:clay_red_candle",
+    "sniffer_blooms:bark_brown_candle",
+    "sniffer_blooms:fossil_blue_candle",
+    "sniffer_blooms:fossil_ivory_candle",
+    "sniffer_blooms:soft_lime_candle",
+    "sniffer_blooms:coral_candle",
+    "sniffer_blooms:obsidian_candle"
   ]
 }
