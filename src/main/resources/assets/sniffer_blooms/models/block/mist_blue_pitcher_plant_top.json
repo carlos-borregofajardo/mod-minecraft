@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/pitcher_plant_top",
+  "textures": {
+    "particle": "sniffer_blooms:block/mist_blue_pitcher_plant",
+    "top": "sniffer_blooms:block/mist_blue_pitcher_plant"
+  }
+}
