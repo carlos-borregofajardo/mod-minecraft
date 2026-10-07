@@ -1,5 +1,5 @@
 {
   "textures": {
-    "particle": "sniffer_blooms:entity/shulker/shulker_soft_terracotta"
+    "particle": "sniffer_blooms:block/soft_terracotta_shulker_box"
   }
 }

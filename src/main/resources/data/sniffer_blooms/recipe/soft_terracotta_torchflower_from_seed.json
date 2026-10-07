@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "X": "sniffer_blooms:soft_terracotta_torchflower_seeds"
+  },
+  "pattern": [
+    "X"
+  ],
+  "result": {
+    "id": "sniffer_blooms:soft_terracotta_torchflower"
+  }
+}
