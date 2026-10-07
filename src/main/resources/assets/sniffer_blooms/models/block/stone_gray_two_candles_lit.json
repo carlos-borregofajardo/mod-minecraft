@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_two_candles",
+  "textures": {
+    "all": "sniffer_blooms:block/stone_gray_candle_lit",
+    "particle": "sniffer_blooms:block/stone_gray_candle_lit"
+  }
+}

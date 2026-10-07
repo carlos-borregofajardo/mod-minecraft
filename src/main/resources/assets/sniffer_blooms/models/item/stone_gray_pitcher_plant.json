@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "sniffer_blooms:block/stone_gray_pitcher_plant"
+  }
+}

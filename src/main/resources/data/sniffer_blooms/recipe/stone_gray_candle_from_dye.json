@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "dyed_candle",
+  "ingredients": [
+    "minecraft:candle",
+    "sniffer_blooms:stone_gray_dye"
+  ],
+  "result": {
+    "id": "sniffer_blooms:stone_gray_candle"
+  }
+}

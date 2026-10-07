@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_transmute",
+  "category": "equipment",
+  "group": "bundle_dye",
+  "input": "#minecraft:bundles",
+  "material": "sniffer_blooms:stone_gray_dye",
+  "result": {
+    "id": "sniffer_blooms:stone_gray_bundle"
+  }
+}
